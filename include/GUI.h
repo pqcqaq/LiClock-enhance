@@ -1,0 +1,26 @@
+#pragma once
+
+typedef struct
+{
+    const uint8_t *icon; // 12*12图标,XBM格式
+    const char *title;   // 标题
+} menu_item;
+
+namespace GUI
+{
+    extern int last_buffer_idx;
+    bool waitLongPress(int btn); // 检查长按，如果是长按则返回true
+    void autoIndentDraw(const char *str, int max_x, int start_x = 2);
+    void drawWindowsWithTitle(const char *title = NULL, int16_t x = 0, int16_t y = 0, int16_t w = 296, int16_t h = 128);
+    void msgbox(const char *title, const char *msg);
+    bool msgbox_yn(const char *title, const char *msg, const char *yes = NULL, const char *no = NULL);
+    int msgbox_number(const char *title, uint16_t digits, int pre_value); // 注意digits，1表示一位，2表示两位，程序中减一
+    void drawKeyboard(int selectedRow, int selectedCol);
+    const char* englishInput(const char *name = "");
+    int msgbox_time(const char *title, int pre_value);
+    int menu(const char *title, const menu_item options[], int16_t ico_w = 8, int16_t ico_h = 8);
+    void drawLBM(int16_t x, int16_t y,const char *filename, uint16_t color);
+    void drawBMP(FS *fs, const char *filename, bool partial_update = 1, bool overwrite = 0, int16_t x = 0, int16_t y = 0, bool with_color  = 1);
+    // fileManager.cpp
+    const char *fileDialog(const char *title, bool isApp = false, const char *endsWidth = NULL);
+} // namespace GUI
