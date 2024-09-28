@@ -207,6 +207,7 @@ bool AppEBook::indexFile()
     int16_t x = 0;       // 当前页中字符的x坐标
     int16_t y = 0;       // 当前页中字符的y坐标
     int c;
+    bool r_flag = false;
     String indexname = String(currentFilename) + ".i";
     indexFileHandle = fopen(indexname.c_str(), "wb");
     if (indexFileHandle == NULL)
@@ -220,14 +221,18 @@ bool AppEBook::indexFile()
     while (true)
     {
     start:
+        if (!r_flag){
         c = fgetc(currentFileHandle);
+        }else{
+            r_flag = false;
+        }
         if (c == EOF)
         {
             break;
         }
+        offset++;
         while (c == '\n' && x == 0 && y == 0)
             goto start;
-        offset++;
         int utf_bytes = 0;
         if (c & 0x80)
         {
@@ -293,8 +298,14 @@ bool AppEBook::indexFile()
             y += 14;
             x = 0;
             add_pending = 0;
+            c = fgetc(currentFileHandle);
+            if (c == '\r'){
+                offset++;
+            }else{
+                r_flag = true;
+            }
         }
-        else if (x + add_pending >= 296)
+        else if (x + add_pending >= 294)
         {
             x = add_pending;
             y += 14;
@@ -422,13 +433,19 @@ uint8_t RTC_DATA_ATTR partcount = 100;
 void AppEBook::drawCurrentPage()
 {
     int16_t x = 0, y = 0;
+    int c;
+    bool r_flag = false;
     // 窗口
     display.clearScreen();
     // 自动换行
     while (true)
     {
     start:
-        int c = fgetc(currentFileHandle);
+        if (!r_flag){
+            c = fgetc(currentFileHandle); 
+        }else{
+            r_flag = false;
+        }
         if (c == EOF)
         {
             __eof = true;
@@ -491,8 +508,12 @@ void AppEBook::drawCurrentPage()
             y += 14;
             x = 0;
             add_pending = 0;
+            c = fgetc(currentFileHandle);
+            if (c != '\r'){
+                r_flag = true;
+            }
         }
-        else if (x + add_pending >= 296)
+        else if (x + add_pending >= 294)
         {
             x = 0;
             y += 14;

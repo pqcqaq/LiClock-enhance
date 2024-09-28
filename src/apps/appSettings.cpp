@@ -279,27 +279,6 @@ void AppSettings::menu_time()
             }
             break;
         case 5:
-            if (GUI::msgbox_yn("手动校正", "校正方向\n减(左)\n加(右)", "加", "减"))
-            {
-                // 启用
-                byte b=GUI::msgbox_number("增加的秒数",2,1);
-                byte a;
-                a = Srtc.getSecond() + b;
-                Srtc.setSecond(a);
-                Serial.printf("增加%d秒\n",b);
-                Serial.printf("DS3231数据：20%d年%d月%d日  %d:%d:%d\n",Srtc.getYear(),Srtc.getMonth(),Srtc.getDate(),Srtc.getHour(),Srtc.getMinute(),Srtc.getSecond());
-            }
-            else
-            {
-                byte b=GUI::msgbox_number("减少的秒数",2,1);
-                byte a;
-                a = Srtc.getSecond() - b;
-                Srtc.setSecond(a);
-                Serial.printf("减少%d秒\n",b);
-                Serial.printf("DS3231数据：20%d年%d月%d日  %d:%d:%d\n",Srtc.getYear(),Srtc.getMonth(),Srtc.getDate(),Srtc.getHour(),Srtc.getMinute(),Srtc.getSecond());
-            }            
-            break;
-        case 6:
             // 离线模式
             if (GUI::msgbox_yn("时间设置", "在复位为power on时自动联网更新ESP32的时间", "启用", "禁用"))
             {
