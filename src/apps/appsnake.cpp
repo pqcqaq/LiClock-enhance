@@ -30,9 +30,9 @@ public:
 };
 static Appsnake snake;
 
-const uint8_t snakeSize = 8;  // 蛇身单位尺寸
-const uint8_t screenWidth = (200) / snakeSize;
-const uint8_t screenHeight = (168) / snakeSize;
+const uint8_t snakeSize = 4;  // 蛇身单位尺寸
+const uint8_t screenWidth = 288 / snakeSize;
+const uint8_t screenHeight = 103 / snakeSize;
 
 const uint8_t wallOffsetX = 0;   // 墙距离屏幕左右边缘的距离
 const uint8_t wallOffsetY = 21;  // 墙距离屏幕上边缘的距离

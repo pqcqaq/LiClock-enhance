@@ -182,6 +182,8 @@ void AppEBook::setup()
     {
         delay(10);
     }
+    appManager.noDeepSleep = false;
+    appManager.nextWakeup = 61 - hal.timeinfo.tm_sec;
 }
 
 // 索引格式
@@ -578,6 +580,9 @@ static int get_digits(int val)
 }
 void AppEBook::openMenu()
 {
+    int moth=peripherals.rtc.getMonth(),d=peripherals.rtc.getDate(),dw=peripherals.rtc.getDoW(),h=peripherals.rtc.getHour(),m=peripherals.rtc.getMinute(),s=peripherals.rtc.getSecond();
+    char buf[64];
+    sprintf(buf,"当前时间:%d月%d日 星期%d %d:%d:%d",moth,d,dw,h,m,s);
     char *title = (char *)malloc(128);
     int totalPages = getTotalPages();
     sprintf(title, "%d/%d %d%%", currentPage + 1, totalPages, (currentPage + 1) * 100 / totalPages);
@@ -587,6 +592,7 @@ void AppEBook::openMenu()
         {NULL, "换文件.."},
         {NULL, "重建当前文件索引"},
         {NULL, "跳转到.."},
+        {NULL,buf},
         {NULL, NULL},
     };
     int ret = GUI::menu(title, items);

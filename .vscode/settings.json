@@ -10,5 +10,6 @@
         "lrodefs.h": "c",
         "lualib.h": "c",
         "lauxlib.h": "c"
-    }
+    },
+    "cmake.ignoreCMakeListsMissing": true
 }
