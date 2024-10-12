@@ -19,6 +19,7 @@ public:
      */
     bool init();
     void autoConnectWiFi();
+    void searchWiFi();
     void powerOff(bool displayMessage = true);
     void goSleep(uint32_t sec = 0);
     void update();
@@ -30,6 +31,7 @@ public:
     struct tm timeinfo;
     time_t now;
     int global_hour_offset = 0;
+    int numNetworks = 0;
     time_t lastsync = 1;
     int32_t every = 100;
     int32_t delta = 0;

@@ -218,6 +218,18 @@ bool AppEBook::indexFile()
         GUI::msgbox("打开索引文件失败", indexname.c_str());
         return false;
     }
+    uint8_t buffer[3];
+    buffer[0] = fgetc(currentFileHandle);
+    buffer[1] = fgetc(currentFileHandle);
+    buffer[2] = fgetc(currentFileHandle);
+
+    // 检查是否为 BOM 头
+    if (buffer[0] == 0xEF && buffer[1] == 0xBB && buffer[2] == 0xBF) {
+        Serial.println("File starts with UTF-8 BOM");
+        fseek(currentFileHandle, 3, SEEK_SET); // 移动到 BOM 头之后的位置
+    } else {
+        fseek(currentFileHandle, 0, SEEK_SET); // 如果不是 BOM 头，回到文件开头
+    }
     int m=hal.timeinfo.tm_min;
     int s=hal.timeinfo.tm_sec;
     while (true)
@@ -434,6 +446,19 @@ bool AppEBook::gotoPage(uint32_t page)
 uint8_t RTC_DATA_ATTR partcount = 100;
 void AppEBook::drawCurrentPage()
 {
+    uint32_t offsetall = 0;
+    offsetall = ftell(currentFileHandle);
+    uint8_t buffer[3];
+    buffer[0] = fgetc(currentFileHandle);
+    buffer[1] = fgetc(currentFileHandle);
+    buffer[2] = fgetc(currentFileHandle);
+    // 检查是否为 BOM 头
+    if (buffer[0] == 0xEF && buffer[1] == 0xBB && buffer[2] == 0xBF) {
+        Serial.println("File starts with UTF-8 BOM");
+        fseek(currentFileHandle, offsetall + 3, SEEK_SET); // 移动到 BOM 头之后的位置
+    } else {
+        fseek(currentFileHandle, offsetall, SEEK_SET); // 如果不是 BOM 头，回到文件开头
+    }
     int16_t x = 0, y = 0;
     int c;
     bool r_flag = false;
@@ -493,6 +518,7 @@ void AppEBook::drawCurrentPage()
             else
             {
                 Serial.println("非预期的UTF8编码");
+                F_LOG("绘制文本时索引错误，可能文件非UTF-8编码");
                 break;
             }
         }
@@ -580,9 +606,10 @@ static int get_digits(int val)
 }
 void AppEBook::openMenu()
 {
-    int moth=peripherals.rtc.getMonth(),d=peripherals.rtc.getDate(),dw=peripherals.rtc.getDoW(),h=peripherals.rtc.getHour(),m=peripherals.rtc.getMinute(),s=peripherals.rtc.getSecond();
+    const char *dayOfWeek[] = {"日", "一", "二", "三", "四", "五", "六"};
+    int moth=hal.timeinfo.tm_mon + 1,d=hal.timeinfo.tm_mday,dw=hal.timeinfo.tm_wday,h=hal.timeinfo.tm_hour,m=hal.timeinfo.tm_min,s=hal.timeinfo.tm_sec;
     char buf[64];
-    sprintf(buf,"当前时间:%d月%d日 星期%d %d:%d:%d",moth,d,dw,h,m,s);
+    sprintf(buf,"当前时间:%d月%d日 星期%s %d:%d:%d",moth,d,dayOfWeek[dw],h,m,s);
     char *title = (char *)malloc(128);
     int totalPages = getTotalPages();
     sprintf(title, "%d/%d %d%%", currentPage + 1, totalPages, (currentPage + 1) * 100 / totalPages);
@@ -609,6 +636,7 @@ void AppEBook::openMenu()
         if (openFile() == false)
         {
             GUI::msgbox("打开文件失败", currentFilename);
+            F_LOG("文件%s打开失败", currentFilename);
         }
         gotoPage(0);
         drawCurrentPage();
@@ -631,6 +659,7 @@ void AppEBook::openMenu()
             if (gotoPage(page - 1) == false)
             {
                 GUI::msgbox("跳转失败", "页码超出范围");
+                F_LOG("跳转失败，%d超出范围" ,page - 1);
                 gotoPage(currentPage);
             }
             drawCurrentPage();

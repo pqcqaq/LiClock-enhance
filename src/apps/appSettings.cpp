@@ -40,6 +40,7 @@ static const menu_item settings_menu_time[] =
 static const menu_item settings_menu_network[] =
     {
         {NULL, "返回上一级"},
+        {NULL, "搜索周围的WIFI"},
         {NULL, "ESPTouch配网"},
         {NULL, "启动HTTP服务器"},
         {NULL, "ESPNow设备扫描"},
@@ -103,6 +104,7 @@ public:
     void menu_other();
     int binToDec(int bin);
     int decToBin(int dec);
+    void cheak_config(char *a);
 };
 static AppSettings app;
 
@@ -280,7 +282,7 @@ void AppSettings::menu_time()
             break;
         case 5:
             // 离线模式
-            if (GUI::msgbox_yn("时间设置", "在复位为power on时自动联网更新ESP32的时间", "启用", "禁用"))
+            if (GUI::msgbox_yn("时间设置", "在芯片上电复位时自动联网更新ESP32的时间", "启用", "禁用"))
             {
                 // 启用
                 config[autontpsync] = "1";
@@ -438,22 +440,65 @@ void AppSettings::menu_network()
             end = true;
             break;
         case 1:
+            {
+            WiFi.mode(WIFI_STA);
+            hal.searchWiFi();
+            Serial.printf("搜索到的个数:%d",hal.numNetworks);
+            char winfo[hal.numNetworks][64];
+            char _ssid[hal.numNetworks][64];
+            if(hal.numNetworks != 0)
+            {
+                for(int i = 0;i < hal.numNetworks;i++)
+                {
+                    String ssid = WiFi.SSID(i);
+                    char ssidArray[ssid.length() + 1]; // +1 是为了包含字符串末尾的 null 字符
+                    ssid.toCharArray(ssidArray, sizeof(ssidArray));
+                    sprintf(winfo[i],"%s %d",ssidArray,WiFi.RSSI(i));
+                    sprintf(_ssid[i],"%s",ssidArray);
+                }
+            }
+            menu_item *WiFi_list = new menu_item[hal.numNetworks + 2];
+            WiFi_list[0].title = "返回";
+            WiFi_list[0].icon = NULL;
+            for(int i = 1;i < hal.numNetworks;i++)
+            {
+                WiFi_list[i + 1].title = winfo[i];
+                WiFi_list[i + 1].icon = NULL;
+            }
+
+            int res = 0;
+            bool end = false;
+            while (end == false && hasToApp == false)
+            {
+                res = GUI::menu("部分扫描到的WIFI",WiFi_list);
+                if(res == 0)
+                {        
+                    end = true;
+                    break;
+                }else{
+                    cheak_config(_ssid[res - 1]);
+                    break;  
+                }     
+                
+            }}
+            break;
+        case 2:
             // ESPTouch配网
             hal.WiFiConfigSmartConfig();
             break;
-        case 2:
+        case 3:
             // 启动HTTP服务器
             toApp = "webserver";
             hasToApp = true;
             end = true;
             break;
-        case 3:
+        case 4:
             // ESPNow设备扫描
             break;
-        case 4:
+        case 5:
             // 蓝牙扫描
             break;
-        case 5:
+        case 6:
             // 退出Bilibili账号
             if (LittleFS.exists("/blCookies.txt"))
             {
@@ -504,7 +549,7 @@ void AppSettings::menu_other()
             // 天气更新间隔
             {
                 int res = GUI::msgbox_number("请输入天气更新间隔", 2, atoi(config[PARAM_FULLUPDATE].as<const char *>()));
-                if (res <= 5 || res > 40)
+                if (res < 5 || res > 40)
                 {
                     res = 20;
                 }
@@ -519,7 +564,7 @@ void AppSettings::menu_other()
             {
                 int res = weather.refresh();
                 if (res == 0){
-                    GUI::msgbox("更新完成", "已将天气信息保存至/littlefs/weather.bin");
+                    GUI::msgbox("更新完成", "已将天气信息保存至/littlefs/System/weather.bin");
                 }else if (res == -2){
                     GUI::msgbox("发生错误", "错误原因：http错误或异常");
                 }else if (res == -3){
@@ -604,9 +649,11 @@ void AppSettings::menu_other()
             break;
         case 8:
             {
-                if(GUI::msgbox_yn("警告","格式化将清除文件索引，文件将会丢失","确定","取消")){
-                    if(GUI::msgbox_yn("警告","这是最后一次提醒，是否仍要格式化","确定","取消"))
+                if(GUI::msgbox_yn("警告","格式化将丢失所有文件，包括配置文件","确定","取消")){
+                    if(GUI::msgbox_yn("警告","这是最后一次提醒，是否仍要格式化","取消","确定"))
                     {
+                        
+                    }else{
                         if(LittleFS.format()){
                             GUI::msgbox("提示","LiClock成功进行了格式化");}
                         else{
@@ -657,7 +704,7 @@ void AppSettings::menu_other()
                     Serial.begin(115200);
                     Serial.printf("CpuFreq: %dMHZ -> %dMHZ ......", freq, new_freq);
                     if(cpuset){Serial.print("ok\n");GUI::msgbox("提示", "频率修改成功");}
-                    else {Serial.print("err\n");GUI::msgbox("错误", "频率未能修改");}
+                    else {Serial.print("err\n");GUI::msgbox("错误", "频率未能修改");F_LOG("CPU频率修改失败,设置的值:%d", new_freq);}
                 }
             }
             break;
@@ -697,4 +744,31 @@ int AppSettings::binToDec(int bin) {
         base *= 2; // 更新权重
     }
     return decimal;
+}
+
+void AppSettings::cheak_config(char *a)
+{
+    if(GUI::msgbox_yn("提示写入选中WIFI",a,"确定","取消"))
+    {
+        config[PARAM_SSID] = a;
+        hal.saveConfig();
+    }
+    if(GUI::msgbox_yn("密码是否仅有数字",a,"是","否"))
+    {
+        char pass[32];
+        sprintf(pass, "%d", GUI::msgbox_number("输入密码",8,0));
+        config[PARAM_PASS] = pass;
+        config[PARAM_CLOCKONLY] = "1";
+        hal.saveConfig();
+        GUI::msgbox("提示","已写入配置，即将重启！");
+        esp_restart();
+    }
+    else
+    {
+        if(GUI::msgbox_yn("提示","是否启动网页服务器配置密码","确定","取消"))
+        {
+            hal.WiFiConfigManual();
+            ESP.restart();
+        }
+    }
 }

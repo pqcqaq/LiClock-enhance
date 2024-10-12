@@ -38,6 +38,7 @@ void Peripherals::check()
     }
     xSemaphoreGive(i2cMutex);
     Serial.printf("Peripherals check OK: 0x%02x\n", i2cbitmask);
+    F_LOG("Peripherals check OK: 0x%02x", i2cbitmask);
     Serial.println(msg);
     GUI::msgbox("检测到的外设", msg.c_str());
     i2cbitmask |= PERIPHERALS_SD_BIT;
@@ -144,6 +145,7 @@ bool Peripherals::load(uint16_t bitmask)
         {
             xSemaphoreGive(i2cMutex);
             Serial.println("Could not find AHT? Check wiring");
+            F_LOG("Could not find AHT? Check wiring");
             check();
         }
         else
@@ -160,6 +162,8 @@ bool Peripherals::load(uint16_t bitmask)
             xSemaphoreGive(i2cMutex);
             Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
                              "try a different address!"));
+            F_LOG("Could not find a valid BMP280 sensor, check wiring or "
+                  "try a different address!");
             check();
         }
         else

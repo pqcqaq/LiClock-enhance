@@ -193,7 +193,7 @@ int Appwenjian::getFileSize(const char* filePath, bool fromTF)
     {
         //Serial.println("[文件管理] 无法打开文件");
         LOG("\033[31m无法打开文件%s\033[32m\n",filePath);
-
+        F_LOG("无法打开文件%s\n",filePath);
         return 0;
     }
     
@@ -247,15 +247,20 @@ void Appwenjian::setup()
         case 1:
             {
                 const char* newfile;
+                bool ok = false;
                 if(GUI::msgbox_yn("文件管理","新建","文件夹","文件"))
                 {
                     newfile = GUI::englishInput("输入路径，例如/testing/");
                     if(GUI::msgbox_yn("文件管理","新建文件夹到","littlefs","sd"))
                     {
-                        LittleFS.mkdir(newfile);
+                        ok = LittleFS.mkdir(newfile);
                     }
                     else{
-                        SD.mkdir(newfile);
+                        ok = SD.mkdir(newfile);
+                    }
+                    if (!ok)
+                    {GUI::msgbox("文件管理器","无法创建文件夹");
+                    F_LOG("无法创建文件夹");
                     }
                 }else{
                     newfile = GUI::englishInput("输入路径，例如/testing.txt");
@@ -286,12 +291,14 @@ void Appwenjian::setup()
                 {
                    //Serial.println("[文件管理]file无法打开文件");
                    LOG("\033[31m无法打开文件%s\033[32m\n",filename);
+                   F_LOG("无法打开文件%s",filename);
                    break;
                 }
                 if (!newfile)
                 {
                    //Serial.println("[文件管理]newfile 无法打开文件");
                    LOG("\033[31m无法打开文件%s\033[32m\n",combinePath(directoryname,getFileName(filename)));
+                   F_LOG("无法打开文件%s",combinePath(directoryname,getFileName(filename)));
                    break;
                 }
                 if(file.size() > LittleFS.totalBytes() - LittleFS.usedBytes())
@@ -316,11 +323,13 @@ void Appwenjian::setup()
                 {
                    //Serial.println("[文件管理]file无法打开文件");
                    LOG("\033[31m无法打开文件%s\033[32m\n",filename);
+                   F_LOG("无法打开文件%s",filename);
                 }
                 if (!newfile)
                 {
                    //Serial.println("[文件管理]newfile 无法打开文件");
                    LOG("\033[31m无法打开文件%s\033[32m\n",combinePath(directoryname,getFileName(filename)));
+                   F_LOG("无法打开文件%s",combinePath(directoryname,getFileName(filename)));
                 }
                 display.clearScreen();
                 u8g2Fonts.setCursor(1,35);
@@ -336,31 +345,58 @@ void Appwenjian::setup()
         case 3:
             {
                 const char *newname;
+                bool ok = false;
                 if (strncmp(filename, "/sd/", 4) == 0)
                 {
                     newname = GUI::englishInput(remove_path_prefix(filename,"/sd"));
-                    SD.rename(remove_path_prefix(filename,"/sd"),newname);
+                    ok = SD.rename(remove_path_prefix(filename,"/sd"),newname);
                 }
                 else if (strncmp(filename, "/littlefs/", 10) == 0) 
                 {
                     newname = GUI::englishInput(remove_path_prefix(filename,"/littlefs"));
-                    LittleFS.rename(remove_path_prefix(filename,"/littlefs"),newname);
+                    ok = LittleFS.rename(remove_path_prefix(filename,"/littlefs"),newname);
                 }
                 delete[] newname;
             }
             break;
         case 4:
-            if(GUI::msgbox_yn("提示","确定删除") == false)
+            {  
+                bool OK = false;
+            if(GUI::msgbox_yn("提示","删除的为","文件夹","文件") == false)
             {
-                break;
+                if(GUI::msgbox_yn("提示","确定删除") == false)
+                {
+                    break;
+                }else{
+                    if (strncmp(filename, "/sd/", 4) == 0) {
+                        OK = SD.remove(remove_path_prefix(filename,"/sd"));
+                    } 
+                    else if (strncmp(filename, "/littlefs/", 10) == 0) {
+                        OK = LittleFS.remove(remove_path_prefix(filename,"/littlefs"));
+                    }
+                }
+            }else{
+                selctwenjianjia();
+                if(GUI::msgbox_yn("提示","确定删除") == false)
+                {
+                    break;
+                }else{
+                    if (strncmp(filename, "/sd/", 4) == 0) {
+                        OK = SD.rmdir(directoryname);
+                    } 
+                    else if (strncmp(filename, "/littlefs/", 10) == 0) {
+                        OK = LittleFS.rmdir(directoryname);
+                    }
+                }
             }
-            if (strncmp(filename, "/sd/", 4) == 0) {
-                SD.remove(remove_path_prefix(filename,"/sd"));
-            } 
-            else if (strncmp(filename, "/littlefs/", 10) == 0) {
-                LittleFS.remove(remove_path_prefix(filename,"/littlefs"));
+            if(!OK)
+            {
+                GUI::msgbox("错误","删除失败!");
+                LOG("\033[33mremove %s error\033[32m\n",filename);
+                F_LOG("file remove %s error",filename);
+            }else{
+                LOG("\033[33mremove %s\033[32m\n",filename);}
             }
-            LOG("\033[33mremove %s\033[32m\n",filename);
             break;
         case 5:
             { 

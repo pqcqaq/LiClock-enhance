@@ -19,6 +19,12 @@ void setup()
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); // disable brownout detector
     hal.init();
     hal.update();
+    esp_reset_reason_t reset_reason = esp_reset_reason();
+    if(reset_reason == ESP_RST_POWERON)
+    {
+        hal.autoConnectWiFi();
+        NTPSync();
+    }
     int auto_sleep_mv = hal.pref.getInt("auto_sleep_mv", 2800);
     if(hal.VCC < 3400)
     {

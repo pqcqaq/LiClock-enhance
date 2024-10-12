@@ -101,10 +101,8 @@ void HAL::getTime()
         localtime_r(&now, &timeinfo);
     }
 }
-
-void HAL::WiFiConfigSmartConfig()
+static void cheak_freq()
 {
-    ESP_LOGI("hal", "WiFiConfigManual\n");
     int freq = ESP.getCpuFreqMHz();
     if (freq < 80){
         bool cpuset = setCpuFrequencyMhz(80);
@@ -114,6 +112,13 @@ void HAL::WiFiConfigSmartConfig()
             {ESP_LOGI("hal", "ok");}
         else{ESP_LOGW("hal", "err");}
     }
+}
+
+
+void HAL::WiFiConfigSmartConfig()
+{
+    ESP_LOGI("hal", "WiFiConfigManual\n");
+    cheak_freq();
 #include "img_esptouch.h"
     display.fillScreen(GxEPD_WHITE);
     display.drawXBitmap(0, 0, esptouch_bits, 296, 128, GxEPD_BLACK);
@@ -154,15 +159,7 @@ void HAL::WiFiConfigSmartConfig()
 void HAL::WiFiConfigManual()
 {
     ESP_LOGI("hal", "WiFiConfigManual\n");
-    int freq = ESP.getCpuFreqMHz();
-    if (freq < 80){
-        bool cpuset = setCpuFrequencyMhz(80);
-        Serial.begin(115200);
-        ESP_LOGI("hal", "CpuFreq: %dMHZ -> 80MHZ", freq);
-        if(cpuset)
-            {ESP_LOGI("hal", "ok");}
-        else{ESP_LOGW("hal", "err");}
-    }
+    cheak_freq();
     DNSServer dnsServer;
 #include "img_manual.h"
     String passwd = String((esp_random() % 1000000000L) + 10000000L); // 生成随机密码
@@ -487,6 +484,25 @@ bool HAL::init()
         f.print(DEFAULT_CONFIG);
         f.close();
     }
+    if(LittleFS.exists("/System/error log.txt"))
+    {
+        File log_file = LittleFS.open("/System/error log.txt", "r");
+        if(log_file.size() > 1024 * 50){
+            log_file.close();
+            LittleFS.remove("/System/error log.txt");
+        }
+        log_file.close();
+    }else{      
+        File log_file = LittleFS.open("/System/error log.txt", "a");
+        // 添加 BOM 头
+        log_file.write(0xEF);
+        log_file.write(0xBB);
+        log_file.write(0xBF);
+    }
+    F_LOG("ESP32复位,原因:%d", esp_reset_reason());
+    if(esp_reset_reason() == ESP_RST_DEEPSLEEP){
+        F_LOG("DeepSleep唤醒源:%d", esp_sleep_get_wakeup_cause());
+    }
     loadConfig();
     weather.begin();
     buzzer.init();
@@ -501,16 +517,7 @@ bool HAL::init()
 void HAL::autoConnectWiFi()
 {
     ESP_LOGI("hal", "autoConnectWiFi\n");
-    int freq = ESP.getCpuFreqMHz();
-    if (freq < 80){
-        bool cpuset = setCpuFrequencyMhz(80);
-        Serial.begin(115200);
-        ESP_LOGI("hal", "CpuFreq: %dMHZ -> 80MHZ", freq);
-        if(cpuset)
-            {ESP_LOGI("hal", "ok");}
-        else{ESP_LOGW("hal", "err");}
-    }
-
+    cheak_freq();
     if (WiFi.isConnected())
     {
         return;
@@ -535,6 +542,22 @@ void HAL::autoConnectWiFi()
     }
     sntp_stop();
 }
+
+void HAL::searchWiFi()
+{
+    ESP_LOGI("hal", "searchWiFi");
+    cheak_freq();
+    WiFi.mode(WIFI_STA);
+    hal.numNetworks = WiFi.scanNetworks();
+    if(hal.numNetworks == 0)
+    {
+        hal.numNetworks = WiFi.scanNetworks();
+        if(hal.numNetworks == 0)
+        {
+            Serial.printf("没有搜索到WIFI");
+        }
+    }
+}
 static void set_sleep_set_gpio_interrupt()
 {
     if (hal.btn_activelow)
@@ -555,6 +578,7 @@ static void pre_sleep()
     set_sleep_set_gpio_interrupt();
     display.hibernate();
     buzzer.waitForSleep();
+    LittleFS.end();
     delay(10);
     ledcDetachPin(PIN_BUZZER);
     digitalWrite(PIN_BUZZER, 0);
@@ -787,6 +811,7 @@ void HAL::copy(File &newFile, File &file)
     char *buf = (char *)malloc(bufferSize);
     if (!buf) {
         LOG("\033[31m内存分配失败\033[32m\n");
+        F_LOG("内存分配失败");
         ESP.restart();
     }
 

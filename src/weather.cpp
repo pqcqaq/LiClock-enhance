@@ -31,6 +31,7 @@ void Weather::begin()
     if (!file)
     {
         Serial.println("无法打开天气文件，或天气不存在");
+        F_LOG("无法打开天气文件，或天气不存在");
         return;
     }
     file.readBytes((char *)&hour24, sizeof(hour24));
@@ -53,6 +54,7 @@ void Weather::save()
     if (!file)
     {
         Serial.println("无法写入天气文件");
+        F_LOG("无法写入天气文件");
         return;
     }
     file.write((uint8_t *)&hour24, sizeof(hour24));
@@ -90,6 +92,7 @@ int8_t Weather::refresh()
             http.end();
             doc.clear();
             Serial.println("天气API已失效");
+            F_LOG("天气API已失效");
             return -3;
         }
         if (doc["result"]["alert"]["status"] == "ok")
@@ -151,6 +154,7 @@ int8_t Weather::refresh()
     {
         http.end();
         Serial.println("HTTP错误");
+        F_LOG("天气更新时出现HTTP错误");
         return -2;
     }
     http.end();

@@ -203,6 +203,7 @@ void searchForLuaAPP()
     if (!root)
     {
         Serial.println("[文件] root未打开");
+        F_LOG("LittleFS根目录无法打开");
     }
     file = root.openNextFile();
     while (file)

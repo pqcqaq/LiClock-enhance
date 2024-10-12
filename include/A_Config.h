@@ -36,6 +36,18 @@
 #define PIN_SDA 23
 #define PIN_SCL 22
 
+#define F_LOG(fmt, ...) \
+  do { \
+    File file_log = LittleFS.open("/System/error log.txt", "a"); \
+    if (file_log) { \
+      file_log.printf("[%s:%d] ", __FILE__, __LINE__); \
+      file_log.printf(fmt, ##__VA_ARGS__); \
+      file_log.println(); \
+    } else { \
+      Serial.println("无法打开日志文件"); \
+    } \
+    file_log.close(); \
+  } while (0)
 // 下面这些尽量不要修改，因为改了不完全有效
 #define GRAPH_HEIGHT 37
 #define SAMPLE_COUNT 10
