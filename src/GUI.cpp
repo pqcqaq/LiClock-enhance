@@ -5,7 +5,7 @@ namespace GUI
     int last_buffer_idx = 0;
     bool waitLongPress(int btn) // 检查长按，如果是长按则返回true
     {
-        for (int16_t i = 0; i < 25; ++i)
+        for (int16_t i = 0; i < hal.pref.getInt("lpt", 25); ++i)
         {
             if (digitalRead(btn) == hal.btn_activelow)
                 return false;

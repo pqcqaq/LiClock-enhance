@@ -76,6 +76,7 @@ static const menu_item settings_menu_other[] =
         {NULL, "sd_clk_freq set"},
         {NULL, "cpufreq set"},
         {NULL, "自动休眠电压"},
+        {NULL, "长按时间"},
         {NULL, NULL},
 };
 
@@ -713,7 +714,13 @@ void AppSettings::menu_other()
                 int auto_sleep_mv = GUI::msgbox_number("自动休眠电压", 4, hal.pref.getInt("auto_sleep_mv", 2800));
                 hal.pref.putInt("auto_sleep_mv", auto_sleep_mv);
             }
-            break;    
+            break;   
+        case 13:
+            {
+                int long_pres_time = GUI::msgbox_number("长按时间", 4, hal.pref.getInt("lpt", 25) * 10);
+                hal.pref.putInt("lpt", long_pres_time / 10);
+            }
+            break;
         default:
             break;
         }
