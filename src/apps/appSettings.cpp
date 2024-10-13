@@ -461,12 +461,13 @@ void AppSettings::menu_network()
             menu_item *WiFi_list = new menu_item[hal.numNetworks + 2];
             WiFi_list[0].title = "返回";
             WiFi_list[0].icon = NULL;
-            for(int i = 1;i < hal.numNetworks;i++)
+            for(int i = 1;i < hal.numNetworks + 1;i++)
             {
-                WiFi_list[i + 1].title = winfo[i];
-                WiFi_list[i + 1].icon = NULL;
+                WiFi_list[i].title = winfo[i - 1];
+                WiFi_list[i].icon = NULL;
             }
-
+            WiFi_list[hal.numNetworks + 1].title = NULL;
+            WiFi_list[hal.numNetworks + 1].icon = NULL;
             int res = 0;
             bool end = false;
             while (end == false && hasToApp == false)

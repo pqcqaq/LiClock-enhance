@@ -84,6 +84,7 @@ uint16_t Peripherals::checkAvailable(uint16_t bitmask)
 bool Peripherals::load(uint16_t bitmask)
 {
     Serial.printf("[外设] 外设加载：0x%x -> 0x%x，当前安装：0x%x\n", peripherals_load, bitmask, peripherals_current);
+    F_LOG("外设加载:0x%x -> 0x%x,当前安装,0x%x", peripherals_load, bitmask, peripherals_current);
     if (bitmask & PERIPHERALS_SD_BIT && (peripherals_load & PERIPHERALS_SD_BIT) == 0)
     {
         // 需要加载TF卡
@@ -98,6 +99,7 @@ bool Peripherals::load(uint16_t bitmask)
             if (SD.begin(PIN_SD_CS, SDSPI, freq) == false)
             {
                 delay(100);
+                F_LOG("TF卡挂载失败,尝试重新挂载");
                 if (SD.begin(PIN_SD_CS, SDSPI, freq) == false)
                 {
                     GUI::msgbox("错误", "存在TF卡，但无法挂载");
@@ -198,6 +200,7 @@ void Peripherals::sleep()
             delay(50);
             digitalWrite(PIN_SDVDD_CTRL, 1);
             Serial.printf("[外设] 卸载并关闭TF卡供电\n");
+            F_LOG("卸载并关闭TF卡供电");
         }
     }
     else
@@ -210,6 +213,7 @@ void Peripherals::sleep()
             gpio_hold_en((gpio_num_t)27);
             //gpio_deep_sleep_hold_en();
             Serial.printf("[外设] 卸载并保持TF卡供电\n");
+            F_LOG("卸载并保持TF卡供电");
         }
     }
     gpio_deep_sleep_hold_en();    

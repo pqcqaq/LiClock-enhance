@@ -108,9 +108,10 @@ static void cheak_freq()
         bool cpuset = setCpuFrequencyMhz(80);
         Serial.begin(115200);
         ESP_LOGI("hal", "CpuFreq: %dMHZ -> 80MHZ", freq);
+        F_LOG("CpuFreq: %dMHZ -> 80MHZ", freq);
         if(cpuset)
-            {ESP_LOGI("hal", "ok");}
-        else{ESP_LOGW("hal", "err");}
+            {ESP_LOGI("hal", "ok");F_LOG("已调节CPU频率至可启用WIFI的状态");}
+        else{ESP_LOGW("hal", "err");F_LOG("CPU频率调节失败");}
     }
 }
 
@@ -414,7 +415,6 @@ bool HAL::init()
     delta = pref.getInt("delta", 0);        // 这两次校准之间时钟偏差秒数，时钟时间-准确时间
     upint = pref.getInt("upint", 2 * 60);   // NTP同步间隔
     // 系统“自检”
-    peripherals.init();
 
     int date = pref.getInt("CpuFreq", 80);
     int freq = ESP.getCpuFreqMHz();
@@ -501,9 +501,10 @@ bool HAL::init()
     }
     F_LOG("ESP32复位,原因:%d", esp_reset_reason());
     if(esp_reset_reason() == ESP_RST_DEEPSLEEP){
-        F_LOG("DeepSleep唤醒源:%d", esp_sleep_get_wakeup_cause());
+        F_LOG("复位为DeepSleep,唤醒源:%d", esp_sleep_get_wakeup_cause());
     }
     loadConfig();
+    peripherals.init();
     weather.begin();
     buzzer.init();
     xTaskCreate(task_hal_update, "hal_update", 2048, NULL, 10, NULL);
@@ -540,6 +541,10 @@ void HAL::autoConnectWiFi()
             hal.ReqWiFiConfig();
         }
     }
+    F_LOG("成功连接:%s", WiFi.SSID().c_str());
+    F_LOG("IP:%s", WiFi.localIP().toString().c_str());
+    F_LOG("MAC:%s", WiFi.macAddress().c_str());
+    F_LOG("信号强度:%d", WiFi.RSSI());
     sntp_stop();
 }
 
@@ -555,6 +560,7 @@ void HAL::searchWiFi()
         if(hal.numNetworks == 0)
         {
             Serial.printf("没有搜索到WIFI");
+            F_LOG("没有搜索到WIFI");
         }
     }
 }

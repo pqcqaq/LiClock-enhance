@@ -40,6 +40,7 @@
   do { \
     File file_log = LittleFS.open("/System/error log.txt", "a"); \
     if (file_log) { \
+      file_log.printf("[%06d]", esp_log_timestamp());\
       file_log.printf("[%s:%d] ", __FILE__, __LINE__); \
       file_log.printf(fmt, ##__VA_ARGS__); \
       file_log.println(); \

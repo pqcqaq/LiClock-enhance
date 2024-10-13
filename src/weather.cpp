@@ -136,6 +136,7 @@ int8_t Weather::refresh()
         for (uint8_t i = 0; i < 4; ++i)
         {
             Serial.println(doc["result"]["daily"]["temperature"][i]["date"].as<String>());
+            F_LOG(doc["result"]["daily"]["temperature"][i]["date"]);
             five_days[i].max = int16_t(doc["result"]["daily"]["temperature"][i]["max"].as<float>() * 10);
             five_days[i].min = int16_t(doc["result"]["daily"]["temperature"][i]["min"].as<float>() * 10);
             five_days[i].weathernum = codeToNum(doc["result"]["daily"]["skycon"][i]["value"].as<String>().c_str());
@@ -149,6 +150,7 @@ int8_t Weather::refresh()
         lastupdate = hal.now;
         save();
         Serial.println("天气更新成功");
+        F_LOG("天气更新成功");
     }
     else
     {
