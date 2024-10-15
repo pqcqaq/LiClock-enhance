@@ -69,7 +69,7 @@ namespace GUI
     void push_buffer();
     void pop_buffer();
     // 注意，下面这个函数完全没有考虑线程安全，no reentrent!!!
-    const char *fileDialog(const char *title, bool isApp, const char *endsWidth)
+    const char *fileDialog(const char *title, bool isApp, const char *endsWidth, const char *gotoendsWidth)
     {
         // 首先选择文件系统
         bool useSD = false;
@@ -140,11 +140,14 @@ namespace GUI
                     ext = "";
                 }
                 Serial.println(tmp);
-                if (tmp.endsWith(".i"))
+                if (gotoendsWidth != NULL)
                 {
-                    file.close();
-                    file = root.openNextFile();
-                    continue;
+                    if (tmp.endsWith(gotoendsWidth))
+                    {
+                        file.close();
+                        file = root.openNextFile();
+                        continue;
+                    }
                 }
                 if (isApp == false)
                 {

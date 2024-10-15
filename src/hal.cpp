@@ -620,6 +620,7 @@ void HAL::goSleep(uint32_t sec)
     {
         esp_light_sleep_start();
         display.init(0, false);
+        LittleFS.begin(false);
         peripherals.wakeup();
         ledcAttachPin(PIN_BUZZER, 0);
     }
@@ -649,6 +650,7 @@ void HAL::powerOff(bool displayMessage)
     {
         esp_light_sleep_start();
         display.init(0, false);
+        LittleFS.begin(false);
         peripherals.wakeup();
     }
     else

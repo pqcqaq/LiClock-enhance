@@ -234,7 +234,7 @@ void Appwenjian::setup()
     };
     fanhui:
     int res = 0;
-    filename = GUI::fileDialog("文件管理");
+    filename = GUI::fileDialog("文件管理", false, NULL, NULL);
     while (hasToApp == false)
     {
         sprintf(buf,"文件系统:%d/%d|%dkB",LittleFS.usedBytes()/1024, LittleFS.totalBytes() / 1024,(LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024);

@@ -474,10 +474,12 @@ void AppSettings::menu_network()
             {
                 res = GUI::menu("部分扫描到的WIFI",WiFi_list);
                 if(res == 0)
-                {        
+                {    
+                    delete[] WiFi_list;    
                     end = true;
                     break;
                 }else{
+                    delete[] WiFi_list;
                     cheak_config(_ssid[res - 1]);
                     break;  
                 }     

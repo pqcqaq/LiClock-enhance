@@ -22,5 +22,5 @@ namespace GUI
     void drawLBM(int16_t x, int16_t y,const char *filename, uint16_t color);
     void drawBMP(FS *fs, const char *filename, bool partial_update = 1, bool overwrite = 0, int16_t x = 0, int16_t y = 0, bool with_color  = 1);
     // fileManager.cpp
-    const char *fileDialog(const char *title, bool isApp = false, const char *endsWidth = NULL);
+    const char *fileDialog(const char *title, bool isApp = false, const char *endsWidth = NULL, const char *gotoendsWidth = ".i");
 } // namespace GUI
