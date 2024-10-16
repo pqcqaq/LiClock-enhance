@@ -33,8 +33,8 @@ static const menu_item settings_menu_time[] =
         {NULL, "手动触发NTP"},
         {NULL, "时间同步间隔设置"},
         {NULL, "RTC线性偏移修正"},
-        {NULL, "在复位为“power on”时自动对时"},
         {NULL, "离线模式"},
+        {NULL, "在复位为“power on”时自动对时"},
         {NULL, NULL},
 };
 static const menu_item settings_menu_network[] =
