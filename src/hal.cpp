@@ -507,6 +507,7 @@ bool HAL::init()
     peripherals.init();
     weather.begin();
     buzzer.init();
+    TJpgDec.setCallback(GUI::epd_output);
     xTaskCreate(task_hal_update, "hal_update", 2048, NULL, 10, NULL);
     if (initial == false && timeerr == false)
     {

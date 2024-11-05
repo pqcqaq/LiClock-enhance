@@ -622,6 +622,28 @@ void Appwenjian::openfile()
             }
             delay(100);
         }
+    }else if(strcmp(houzhui, "JPG") == 0 || strcmp(houzhui, "jpg") == 0){
+        display.clearScreen();
+        if (strncmp(filename, "/sd/", 4) == 0) {
+            GUI::drawJPG(remove_path_prefix(filename,"/sd"), SD);
+        } 
+        else if (strncmp(filename, "/littlefs/", 10) == 0) {
+            GUI::drawJPG(remove_path_prefix(filename,"/littlefs"), LittleFS);
+        }
+        while (1)
+        {
+            if(hal.btnr.isPressing())
+            {
+                appManager.noDeepSleep = false;
+                hal.powerOff(false);
+                esp_deep_sleep_start();
+            }
+            if(hal.btnc.isPressing())
+            {
+                break;
+            }
+            delay(100);
+        }
     }else {
         GUI::msgbox("提示","文件格式没有支持的显示或处理方式，使用16进制(bin)模式打开");
         openbin();

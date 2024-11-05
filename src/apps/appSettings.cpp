@@ -180,7 +180,7 @@ void AppSettings::setup()
             display.clearScreen();
             GUI::drawWindowsWithTitle("关于本设备", 0, 0, 296, 128);
             u8g2Fonts.setCursor(5,30);
-            u8g2Fonts.printf("设备名称:LiClock 版本:2.0.10.5 DS3231:%d.%d %d:%d:%d",Srtc.getMonth() + 1,Srtc.getDate(),Srtc.getHour(),Srtc.getMinute(),Srtc.getSecond());
+            u8g2Fonts.printf("设备名称:LiClock 版本:2.0.10.5   by 看番的龙");
             u8g2Fonts.drawUTF8(5,45,"CPU:Xtensa@32-bit LX6 @0.24GHz X2+ULP");
             u8g2Fonts.setCursor(5,60);
             u8g2Fonts.printf("内存:520KB SRAM+16KB RTC SRAM   存储:%dMB",ESP.getFlashChipSize() / 1024 / 1024);
@@ -189,7 +189,7 @@ void AppSettings::setup()
             u8g2Fonts.setCursor(5,90);
             u8g2Fonts.printf("屏幕类型:EPD  屏幕分辨率:296X128 CPU_freq:%uMHz", getCpuFrequencyMhz());
             u8g2Fonts.setCursor(5,105);
-            u8g2Fonts.printf("作者:小李电子实验室 chip model:%s", ESP.getChipModel());
+            u8g2Fonts.printf("原作者:小李电子实验室 chip model:%s", ESP.getChipModel());
             u8g2Fonts.drawUTF8(5,120,"开源程序网址:https://github.com/diylxy/LiClock");
             display.display();
             while (digitalRead(PIN_BUTTONC) == 0 && digitalRead(PIN_BUTTONL) == 0 && digitalRead(PIN_BUTTONR) == 0)
