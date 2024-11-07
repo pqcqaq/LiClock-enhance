@@ -180,7 +180,7 @@ void AppSettings::setup()
             display.clearScreen();
             GUI::drawWindowsWithTitle("关于本设备", 0, 0, 296, 128);
             u8g2Fonts.setCursor(5,30);
-            u8g2Fonts.printf("设备名称:LiClock 版本:2.0.10.5   by 看番的龙");
+            u8g2Fonts.printf("设备名称:LiClock 版本:2.0.10.7   by 看番的龙");
             u8g2Fonts.drawUTF8(5,45,"CPU:Xtensa@32-bit LX6 @0.24GHz X2+ULP");
             u8g2Fonts.setCursor(5,60);
             u8g2Fonts.printf("内存:520KB SRAM+16KB RTC SRAM   存储:%dMB",ESP.getFlashChipSize() / 1024 / 1024);
