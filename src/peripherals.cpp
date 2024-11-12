@@ -94,7 +94,7 @@ bool Peripherals::load(uint16_t bitmask)
             Serial.println("[外设] 加载TF卡");
             digitalWrite(PIN_SDVDD_CTRL, 0);
             delay(50);
-            uint32_t freq = (uint32_t)hal.pref.getInt("sd_clk_freq" , 20000000);
+            uint32_t freq = (uint32_t)hal.pref.getInt("sd_clk_freq" , 500000);
             Serial.printf("[外设] 设置TF卡频率:%d HZ\n", freq); 
             if (SD.begin(PIN_SD_CS, SDSPI, freq) == false)
             {

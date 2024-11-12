@@ -692,7 +692,7 @@ void AppSettings::menu_other()
             break;
         case 10:
         {
-            float new_clk_freq = (float)GUI::msgbox_number("SD卡时钟", 8, hal.pref.getInt("sd_clk_freq" , 20000000));
+            float new_clk_freq = (float)GUI::msgbox_number("SD卡时钟", 8, hal.pref.getInt("sd_clk_freq" , 500000));
             hal.pref.putInt("sd_clk_freq" , new_clk_freq);
         }
             break;
