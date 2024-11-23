@@ -36,6 +36,7 @@ public:
         description = "默认主页应用";
         image = clock_cloud_bits;
     }
+    void set();
     void setup();
 
 private:
@@ -180,6 +181,9 @@ void appclock_wakeup()
 {
     app.setup();
 }
+void AppClock::set(){
+    _showInList = hal.pref.getBool(hal.get_char_sha_key(title), true);
+}
 void AppClock::setup()
 {
     exit = appclock_exit;
@@ -200,6 +204,7 @@ void AppClock::setup()
                 appManager.noDeepSleep = false;
                 appManager.nextWakeup = 61 - hal.timeinfo.tm_sec;
                 Serial.println("Finished part");
+                //Serial.printf("%d.%d.%d %d %d:%d:%d\n", hal.timeinfo.tm_year + 1900, hal.timeinfo.tm_mon + 1, hal.timeinfo.tm_mday, hal.timeinfo.tm_wday, hal.timeinfo.tm_hour, hal.timeinfo.tm_min, hal.timeinfo.tm_sec);
                 return;
             }
         }
@@ -212,6 +217,7 @@ void AppClock::setup()
     hal.getTime();
     if (hal.timeinfo.tm_year < (2016 - 1900) || NTPCounter >= ntp_interval) // 等待NTP同步
     {
+        //GUI::info_msgbox("提示", "NTP正在同步，请稍等...");
         NTPCounter = 0;
         delay(20);
         hal.autoConnectWiFi();
@@ -220,6 +226,7 @@ void AppClock::setup()
     }
     if (hal.now < weather.lastupdate || hal.now - weather.lastupdate > 60 * atoi(config[PARAM_FULLUPDATE].as<const char *>()))
     {
+        //GUI::info_msgbox("提示", "正在更新天气数据...");
         hal.autoConnectWiFi();
         weather.refresh();
     }
@@ -235,5 +242,6 @@ void AppClock::setup()
     appManager.noDeepSleep = false;
     appManager.nextWakeup = 61 - hal.timeinfo.tm_sec;
     Serial.println("Finished full");
+    //Serial.printf("%d.%d.%d %d %d:%d:%d\n", hal.timeinfo.tm_year + 1900, hal.timeinfo.tm_mon + 1, hal.timeinfo.tm_mday, hal.timeinfo.tm_wday, hal.timeinfo.tm_hour, hal.timeinfo.tm_min, hal.timeinfo.tm_sec);
     return;
 }

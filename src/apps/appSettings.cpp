@@ -68,7 +68,7 @@ static const menu_item settings_menu_other[] =
         {NULL, "天气更新间隔"},
         {NULL, "立即更新天气"},
         {NULL, "主屏幕应用选择"},
-        {NULL, "已安装应用管理"},
+        {NULL, "应用管理"},
         {NULL, "TF加载方式"},
         {NULL, "恢复出厂设置"},
         {NULL, "格式化Littlefs"},
@@ -97,6 +97,7 @@ public:
         noDefaultEvent = true;
         peripherals_requested = PERIPHERALS_SD_BIT;
     }
+    void set();
     void setup();
     void menu_time();
     void menu_alarm();
@@ -109,6 +110,9 @@ public:
 };
 static AppSettings app;
 
+void AppSettings::set(){
+    _showInList = hal.pref.getBool(hal.get_char_sha_key(title), true);
+}
 void AppSettings::setup()
 {
     display.clearScreen();
@@ -180,7 +184,7 @@ void AppSettings::setup()
             display.clearScreen();
             GUI::drawWindowsWithTitle("关于本设备", 0, 0, 296, 128);
             u8g2Fonts.setCursor(5,30);
-            u8g2Fonts.printf("设备名称:LiClock 版本:2.0.10.7   by 看番的龙");
+            u8g2Fonts.printf("设备名称:LiClock 版本:2.0.10.8   by 看番的龙");
             u8g2Fonts.drawUTF8(5,45,"CPU:Xtensa@32-bit LX6 @0.24GHz X2+ULP");
             u8g2Fonts.setCursor(5,60);
             u8g2Fonts.printf("内存:520KB SRAM+16KB RTC SRAM   存储:%dMB",ESP.getFlashChipSize() / 1024 / 1024);
@@ -192,7 +196,7 @@ void AppSettings::setup()
             u8g2Fonts.printf("原作者:小李电子实验室 chip model:%s", ESP.getChipModel());
             u8g2Fonts.drawUTF8(5,120,"开源程序网址:https://github.com/diylxy/LiClock");
             display.display();
-            while (digitalRead(PIN_BUTTONC) == 0 && digitalRead(PIN_BUTTONL) == 0 && digitalRead(PIN_BUTTONR) == 0)
+            while (!hal.btnl.isPressing() && !hal.btnr.isPressing() && !hal.btnc.isPressing())
             {
                 delay(1000);
             }

@@ -20,6 +20,10 @@ public:
     bool _reentrant = true;                       // 阻止休眠后重新打开，用于某些只能运行一次的App或临时App对象
 
     /**
+     * @brief 设置APP的隐藏状态
+     */
+    virtual void set(){};
+    /**
      * @brief 初始化(App打开)
      */
     virtual void setup(){};
@@ -78,6 +82,7 @@ public:
     void gotoAppBoot(const char *appName);
     bool recover(AppBase *home = NULL);
     void goBack();
+    void App_Preferences_init();
     void showAppList(int page);                    // 显示Applist
     AppBase *appSelector(bool showHidden = false); // 显示Applist并等待用户输入
     void update();

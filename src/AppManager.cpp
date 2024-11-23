@@ -126,6 +126,7 @@ void buildAppList(bool showHidden)
     {
         if (showHidden == false)
         {
+            appList[i]->set();
             if (appList[i]->_showInList == false)
             {
                 continue;
@@ -137,6 +138,22 @@ void buildAppList(bool showHidden)
         }
         realAppList[realAppCount] = appList[i];
         realAppCount++;
+    }
+}
+void AppManager::App_Preferences_init()
+{
+    if (hal.pref.getBool("app_pref_init", false)){
+        return;
+    }else{
+        log_i("初始化APP显示状态");
+        for (int16_t i = 0; i < tail; i++)
+        {
+            appList[i]->set();
+            hal.pref.putBool(hal.get_char_sha_key(appList[i]->title), appList[i]->_showInList);
+            log_i("APP:%s 显示状态:%s\n", appList[i]->title,  appList[i]->_showInList ? "true" : "false");
+        }
+        hal.pref.putBool("app_pref_init", true);
+        log_i("APP显示状态初始化结束");
     }
 }
 // AppList每页11个，算左上角一个返回共12个

@@ -1,16 +1,16 @@
 #include "AppManager.h"
 
-static const uint8_t wenjianimg[] = {
+static const uint8_t wenjian_bits[] = {
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x3f, 0x00, 0x00,
-   0x08, 0x40, 0x00, 0x00, 0x08, 0x80, 0x00, 0x00, 0xf8, 0xff, 0xff, 0x3f,
-   0x08, 0x00, 0x00, 0x20, 0x08, 0x00, 0x00, 0x20, 0x08, 0x00, 0x00, 0x20,
-   0x08, 0x00, 0x00, 0x20, 0x08, 0x00, 0x00, 0x20, 0x08, 0x00, 0x00, 0x20,
-   0x08, 0x00, 0x00, 0x20, 0x08, 0x00, 0x00, 0x20, 0x08, 0x00, 0x00, 0x20,
-   0x08, 0x00, 0x00, 0x20, 0x08, 0x00, 0x00, 0x20, 0x88, 0xff, 0xff, 0x20,
-   0x88, 0x00, 0x80, 0x20, 0x88, 0xfc, 0x9f, 0x20, 0x88, 0x04, 0x90, 0x20,
-   0x88, 0x04, 0x90, 0x20, 0xf8, 0xff, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0x01, 0x00,
+   0xfe, 0xff, 0x03, 0x00, 0x06, 0x00, 0xff, 0x3f, 0xfe, 0xff, 0xff, 0x7f,
+   0xfe, 0xff, 0x01, 0x60, 0x06, 0x00, 0x00, 0x60, 0x06, 0x00, 0x00, 0x60,
+   0x06, 0x00, 0x00, 0x60, 0x06, 0x00, 0x00, 0x60, 0x06, 0xff, 0xff, 0x60,
+   0x86, 0xff, 0xff, 0x61, 0x86, 0x01, 0x80, 0x61, 0x86, 0x01, 0x80, 0x61,
+   0x86, 0x01, 0x80, 0x61, 0x86, 0xf9, 0x8f, 0x61, 0x86, 0xf9, 0x9f, 0x61,
+   0x86, 0x19, 0x98, 0x61, 0x86, 0x19, 0x98, 0x61, 0x86, 0x19, 0x98, 0x61,
+   0x86, 0x19, 0x98, 0x61, 0xfe, 0xf9, 0x9f, 0x7f, 0xfc, 0xfd, 0xdf, 0x3f,
+   0x80, 0x0f, 0xf8, 0x00, 0x00, 0x07, 0x70, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 //#define wprintf(fmt, ...) printf("[%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
@@ -168,10 +168,11 @@ public:
         name = "wenjian";
         title = "文件管理";
         description = "文件管理器";
-        image = wenjianimg;
+        image = wenjian_bits;
         peripherals_requested = PERIPHERALS_SD_BIT;
         _showInList = true;
     }
+    void set();
     std::list<String> directorylist;
     int getFileSize(const char *filepath, bool fromTF = false);
    // void loadwenjian(const String path);
@@ -193,6 +194,9 @@ time_t LastWrite_time = 0;
 String toApp = "";
 bool hasToApp = false;
 
+void Appwenjian::set(){
+    _showInList = hal.pref.getBool(hal.get_char_sha_key(title), true);
+}
 int Appwenjian::getFileSize(const char* filePath, bool fromTF)
 {
     File file;
@@ -235,6 +239,10 @@ void Appwenjian::setup()
 {
     fanhui:
     filename = GUI::fileDialog("文件管理", false, NULL, NULL);
+    if (filename == NULL)
+    {
+        goto fanhui;
+    }
     float a;
     if (strncmp(filename, "/sd/", 4) == 0) {
         a = (float)getFileSize(filename,true);
@@ -247,12 +255,12 @@ void Appwenjian::setup()
     char Str[128];
     if (a <= 1024){
         sprintf(Str, "大小 %dBytes %d.%d.%d %d:%d", (int)a, filetimeinfo->tm_year + 1900,filetimeinfo->tm_mon + 1, filetimeinfo->tm_mday, filetimeinfo->tm_hour, filetimeinfo->tm_min); 
-    }else if (a <= 1024 * 1024){
+    }else if (a <= 1048576){
         sprintf(Str, "大小 %.2fKB %d.%d.%d %d:%d", a / 1024.0, filetimeinfo->tm_year + 1900,filetimeinfo->tm_mon + 1, filetimeinfo->tm_mday, filetimeinfo->tm_hour, filetimeinfo->tm_min);
-    }else if (a <= 1024 * 1024 * 1024){
-        sprintf(Str, "大小 %.2fMB %d.%d.%d %d:%d", a / 1024.0 / 1024.0, filetimeinfo->tm_year + 1900,filetimeinfo->tm_mon + 1, filetimeinfo->tm_mday, filetimeinfo->tm_hour, filetimeinfo->tm_min);
+    }else if (a <= 1073741824){
+        sprintf(Str, "大小 %.2fMB %d.%d.%d %d:%d", a / 1048576.0, filetimeinfo->tm_year + 1900,filetimeinfo->tm_mon + 1, filetimeinfo->tm_mday, filetimeinfo->tm_hour, filetimeinfo->tm_min);
     }else{
-        sprintf(Str, "大小 %.2fGB %d.%d.%d %d:%d", a / 1024.0 / 1024.0 / 1024.0, filetimeinfo->tm_year + 1900,filetimeinfo->tm_mon + 1, filetimeinfo->tm_mday, filetimeinfo->tm_hour, filetimeinfo->tm_min);
+        sprintf(Str, "大小 %.2fGB %d.%d.%d %d:%d", a / 1073741824.0, filetimeinfo->tm_year + 1900,filetimeinfo->tm_mon + 1, filetimeinfo->tm_mday, filetimeinfo->tm_hour, filetimeinfo->tm_min);
     }
     char buf[64];
     static const menu_item appMenu_main[] = {
@@ -586,13 +594,13 @@ void Appwenjian::openfile()
         display.display();
         while (1)
         {
-            if(digitalRead(PIN_BUTTONR) == 1)
+            if(hal.btnr.isPressing())
             {
                 appManager.noDeepSleep = false;
                 hal.powerOff(false);
                 esp_deep_sleep_start();
             }
-            if(digitalRead(PIN_BUTTONC) == 1)
+            if(hal.btnc.isPressing())
             {
                 break;
             }
@@ -671,7 +679,6 @@ void Appwenjian::selctwenjianjia()
         }
         file = root.openNextFile();
     }
-
     while (file)
     {
         String name = file.name();
