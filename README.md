@@ -2,7 +2,7 @@
 
 ###  **关于发行版** 
 - 基于2.0.10修改，兼容新旧版硬件，群主原工程地址[https://github.com/diylxy/LiClock](https://github.com/diylxy/LiClock)
-- 网页固件烧录地址[https://kanfandelong.github.io/liclock-web-flash/][https://kanfandelong.github.io/liclock-web-flash/]
+- 网页固件烧录地址[https://kanfandelong.github.io/liclock-web-flash/](https://kanfandelong.github.io/liclock-web-flash/)
 - 程序中有一个名为F_LOG的宏定义用于将部分日志信息写入日志文件，不需要的可删除后自行重新编译
 -  **关于GUI交互的修改**
 -  增加英文输入的GUI，englishInput（）函数，及其的依赖函数drawKeyboard（）函数
