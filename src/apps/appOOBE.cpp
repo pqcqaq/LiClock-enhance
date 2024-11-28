@@ -1220,6 +1220,8 @@ void AppOOBE::waitClick()
 }
 void AppOOBE::setup()
 {
+    hal.pref.putInt("lpt", 350);
+    hal.pref.getInt("ppc",7230);
     bool ret = false;
     int reti = 0;
     int stage = hal.pref.getInt("oobe", 0);

@@ -1,5 +1,8 @@
 #include "AppManager.h"
 #include "DS3231.h"
+
+#define code_version "2.0.10.9"
+
 DS3231 Srtc;
 static const uint8_t settings_bits[] = {
     0x00, 0x00, 0xf0, 0x00, 0x00, 0x00, 0xfc, 0x03, 0x00, 0x00, 0xff, 0x03,
@@ -184,7 +187,7 @@ void AppSettings::setup()
             display.clearScreen();
             GUI::drawWindowsWithTitle("关于本设备", 0, 0, 296, 128);
             u8g2Fonts.setCursor(5,30);
-            u8g2Fonts.printf("设备名称:LiClock 版本:2.0.10.8   by 看番的龙");
+            u8g2Fonts.printf("设备名称:LiClock 版本:%s   by 看番的龙", code_version);
             u8g2Fonts.drawUTF8(5,45,"CPU:Xtensa@32-bit LX6 @0.24GHz X2+ULP");
             u8g2Fonts.setCursor(5,60);
             u8g2Fonts.printf("内存:520KB SRAM+16KB RTC SRAM   存储:%dMB",ESP.getFlashChipSize() / 1024 / 1024);
@@ -733,29 +736,31 @@ void AppSettings::menu_other()
         }
     }
 }
-int AppSettings::decToBin(int dec) {
-    int a = 0;
-    int binary = 0;
-    // 将十进制数转换为二进制数
-    while (dec > 0) {
-        int remainder = dec % 2;
-        binary = binary + (remainder * pow10(a)); // 将余数加到二进制数的前面
-        dec /= 2;
-        a++;
-    }
 
-    return binary;
+int AppSettings::decToBin(int dec) {
+    if (dec < 0 || dec > 255) {
+        log_e("非法的输入值");
+        return 0;
+    }
+    int bin = 0;
+    int base = 1;
+    for (int i = 0; i < 8; ++i) {
+        if (dec & 1) { // 检查最低位是否为1
+            bin += base;
+        }
+        dec >>= 1; // 右移一位
+        base *= 10; // 更新权重
+    }
+    return bin;
 }
-// 将二进制数转换为十进制数
 int AppSettings::binToDec(int bin) {
     int decimal = 0;
-    int base = 1; // 用于计算每一位的权重
-    // 从右到左遍历二进制数，计算十进制数
+    int base = 1;
     while (bin > 0) {
-        int digit = bin % 10; // 获取二进制数的最低位
+        int digit = bin % 10;
         decimal += digit * base;
-        bin /= 10; // 去掉二进制数的最低位
-        base *= 2; // 更新权重
+        bin /= 10;
+        base *= 2;
     }
     return decimal;
 }

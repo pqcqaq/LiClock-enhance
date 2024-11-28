@@ -36,6 +36,7 @@ public:
     void drawCurrentPage();
     int getTotalPages();
     void openMenu();
+    void ebooksettings();
     FILE *indexFileHandle = NULL;
     FILE *currentFileHandle = NULL;
     size_t currentFileOffset = 0;
@@ -43,6 +44,7 @@ public:
     bool __eof = false;
 };
 RTC_DATA_ATTR uint32_t currentPage = -1; // 0:第一页
+RTC_DATA_ATTR bool ebook_run = false;
 static AppEBook app;
 static void appebook_exit()
 {
@@ -56,8 +58,13 @@ static void appebook_exit()
         fclose(app.indexFileHandle);
         app.indexFileHandle = NULL;
     }
+    if (hal.pref.getBool(hal.get_char_sha_key("反色显示"))){
+        u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
+        u8g2Fonts.setForegroundColor(GxEPD_BLACK);
+    }
     hal.pref.putInt(SETTINGS_PARAM_LAST_EBOOK_PAGE, currentPage);
     Serial.printf("退出电子书，当前页：%d\n", currentPage);
+    ebook_run = false;
 }
 static void appebook_deepsleep()
 {
@@ -81,6 +88,7 @@ void AppEBook::set(){
 
 void AppEBook::setup()
 {
+    ebook_run = true;
     bool page_changed = false;
     app.exit = appebook_exit;
     app.deepsleep = appebook_deepsleep;
@@ -119,7 +127,7 @@ void AppEBook::setup()
             appManager.goBack();
     }
     gotoPage(currentPage);
-    if (hal.btnl.isPressing())
+    if (hal.btnl.isPressing() || (hal.pref.getBool(hal.get_char_sha_key("根据唤醒源翻页")) && esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0))
     {
         Serial.println("左键按下");
         if (currentPage == 0)
@@ -137,7 +145,7 @@ void AppEBook::setup()
             page_changed = true;
         }
     }
-    else if (hal.btnr.isPressing())
+    if (hal.btnr.isPressing() || (hal.pref.getBool(hal.get_char_sha_key("根据唤醒源翻页")) && esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT1))
     {
         Serial.println("右键按下");
         if (gotoPage(currentPage + 1) == false)
@@ -467,7 +475,13 @@ void AppEBook::drawCurrentPage()
     int c;
     bool r_flag = false;
     // 窗口
-    display.clearScreen();
+    if (hal.pref.getBool(hal.get_char_sha_key("反色显示"))){
+        display.clearScreen(GxEPD_BLACK);
+        u8g2Fonts.setBackgroundColor(GxEPD_BLACK);
+        u8g2Fonts.setForegroundColor(GxEPD_WHITE);
+    }else{
+        display.clearScreen();
+    }
     // 自动换行
     while (true)
     {
@@ -624,6 +638,7 @@ void AppEBook::openMenu()
         {NULL, "重建当前文件索引"},
         {NULL, "跳转到.."},
         {NULL,buf},
+        {NULL, "设置"},
         {NULL, NULL},
     };
     int ret = GUI::menu(title, items);
@@ -670,7 +685,20 @@ void AppEBook::openMenu()
         }
     }
     break;
+    case 6:
+        ebooksettings();
+        break;
     default:
         break;
     }
+}
+
+void AppEBook::ebooksettings(){
+    static const menu_select ebook_set[] = {
+        {false, "返回"},
+        {true, "根据唤醒源翻页"},
+        {true, "反色显示"},
+        {false, NULL},
+    };
+    GUI::select_menu("电子书设置", ebook_set);
 }

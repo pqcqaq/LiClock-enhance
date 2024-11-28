@@ -587,6 +587,7 @@ void HAL::searchWiFi()
         }
     }
 }
+extern bool ebook_run;
 static void set_sleep_set_gpio_interrupt()
 {
     if (hal.btn_activelow)
@@ -596,7 +597,12 @@ static void set_sleep_set_gpio_interrupt()
     }
     else
     {
-        esp_sleep_enable_ext1_wakeup((1ULL << PIN_BUTTONC) | (1ULL << PIN_BUTTONL) | (1ULL << PIN_BUTTONR), ESP_EXT1_WAKEUP_ANY_HIGH);
+        if (hal.pref.getBool(hal.get_char_sha_key("根据唤醒源翻页")) == true && ebook_run == true){
+            esp_sleep_enable_ext0_wakeup((gpio_num_t)hal._wakeupIO[0], 1);
+            esp_sleep_enable_ext1_wakeup((1LL << hal._wakeupIO[1]), ESP_EXT1_WAKEUP_ANY_HIGH);
+        }else{
+            esp_sleep_enable_ext1_wakeup((1ULL << PIN_BUTTONC) | (1ULL << PIN_BUTTONL) | (1ULL << PIN_BUTTONR), ESP_EXT1_WAKEUP_ANY_HIGH);
+        }
     }
 }
 
