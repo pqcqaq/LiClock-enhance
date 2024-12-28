@@ -1,5 +1,5 @@
 # <center>LiClock 墨水屏天气时钟
-
+###  **使用烧录工具烧录发行版固件时不要勾选DoNotChgBin选项,可能会导致程序不运行,使用烧录工具烧录后需要按下复位键** 
 ###  **关于发行版** 
 - 基于2.0.10修改，兼容新旧版硬件，群主原工程地址[https://github.com/diylxy/LiClock](https://github.com/diylxy/LiClock)
 - 网页固件烧录地址[https://kanfandelong.github.io/liclock-web-flash/](https://kanfandelong.github.io/liclock-web-flash/)
