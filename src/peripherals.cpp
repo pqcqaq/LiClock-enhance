@@ -188,6 +188,34 @@ void Peripherals::load_append(uint16_t bitmask)
     if (tmp | bitmask == tmp)
         return;
     peripherals.load(bitmask | tmp);
+
+}
+/**
+ * 卸载TF卡
+ * @param save_power true 保持供电，false 关闭供电
+ */
+void Peripherals::tf_unload(bool save_power){
+    if (digitalRead(PIN_SD_CARDDETECT) == HIGH){
+        log_w("[外设] TF卡不存在，无需卸载");
+        return;
+    }else if(!(peripherals_load & PERIPHERALS_SD_BIT)){
+        log_w("[外设] 未加载TF卡，无需卸载");
+    }
+    SD.end();
+    delay(100);
+    gpio_hold_dis((gpio_num_t)PIN_SDVDD_CTRL);
+    if (save_power)
+        digitalWrite(PIN_SDVDD_CTRL, 0);
+    else
+        digitalWrite(PIN_SDVDD_CTRL, 1);
+    gpio_hold_en((gpio_num_t)PIN_SDVDD_CTRL);
+    if (save_power){
+        log_i("[外设] 卸载并保持TF卡供电\n");
+        F_LOG("卸载并保持TF卡供电");
+    }else{
+        log_i("[外设] 卸载并关闭TF卡供电\n");
+        F_LOG("卸载并关闭TF卡供电");
+    }
 }
 
 void Peripherals::sleep()

@@ -28,6 +28,8 @@ static const uint8_t wenjian_bits[] = {
 
 
 const char *filename;
+const char *filepath;
+const char *file_name;
 
 class Appwenjian : public AppBase
 {
@@ -102,7 +104,8 @@ private:
         file.seek(0, SeekSet);
         displayPage(file, currentPage);
         bool end = false;
-        while (1)
+        unsigned long wait_time = millis();
+        while (!end)
         {
             if (hal.btnr.isPressing()) {
                 currentPage++;
@@ -110,6 +113,7 @@ private:
                     currentPage = totalPages - 1;
                 }
                 displayPage(file, currentPage);
+                wait_time = millis();
             }
             if (hal.btnl.isPressing()) {
                 currentPage--;
@@ -117,6 +121,7 @@ private:
                     currentPage = 0;
                 }
                 displayPage(file, currentPage);
+                wait_time = millis();
             }if (hal.btnc.isPressing()) {
                 static const menu_item appMenu_main[] = {
                     {NULL, "返回"},
@@ -154,11 +159,15 @@ private:
                     default:
                         break;
                 }
+                free(buf);
+                wait_time = millis();
                 //break;
             }if (end){
                 break;
             }
             delay(100);  // 避免按钮抖动
+            if (millis() - wait_time > 30000)
+                hal.wait_input();
         }
         file.close();
     }
@@ -179,10 +188,11 @@ public:
     const char* getFileName(const char* filePath);
     const char* combinePath(const char* directory, const char* fileName);
     const char* remove_path_prefix(const char* path, const char* prefix);
+    const char* getDirectoryPath(const char* filePath);
     void setup();
     const char* get_houzhui(const char* filename);
     void openfile();
-    void selctwenjianjia();
+    void selctwenjianjia(bool _file = false);
     void uint8tobuf(uint8_t *input,int inputSize,char *output);
     //const char* combineFilePath(const char* path, const char* filename, const char* extension);
     bool wenjianend = false;
@@ -214,6 +224,7 @@ int Appwenjian::getFileSize(const char* filePath, bool fromTF)
         F_LOG("无法打开文件%s\n",filePath);
         return 0;
     }
+    filepath = getDirectoryPath(filePath);
     LastWrite_time = file.getLastWrite();
     fileSize = file.size();
     
@@ -243,6 +254,7 @@ void Appwenjian::setup()
     {
         goto fanhui;
     }
+    GUI::info_msgbox("提示", "正在获取文件信息...");
     float a;
     if (strncmp(filename, "/sd/", 4) == 0) {
         a = (float)getFileSize(filename,true);
@@ -291,7 +303,7 @@ void Appwenjian::setup()
                 bool ok = false;
                 if(GUI::msgbox_yn("文件管理","新建","文件夹","文件"))
                 {
-                    newfile = GUI::englishInput("输入路径，例如/testing/");
+                    newfile = GUI::englishInput("输入路径，例如：/testing");
                     if(GUI::msgbox_yn("文件管理","新建文件夹到","littlefs","sd"))
                     {
                         ok = LittleFS.mkdir(newfile);
@@ -304,7 +316,7 @@ void Appwenjian::setup()
                     F_LOG("无法创建文件夹");
                     }
                 }else{
-                    newfile = GUI::englishInput("输入路径，例如/testing.txt");
+                    newfile = GUI::englishInput("输入路径，例如：/testing.txt");
                     File f;
                     if(GUI::msgbox_yn("文件管理","新建文件到","littlefs","sd"))
                     {
@@ -328,6 +340,7 @@ void Appwenjian::setup()
             if (strncmp(filename, "/sd/", 4) == 0) {
                 newfile = LittleFS.open(combinePath(directoryname,getFileName(filename)),"w");
                 file = SD.open(remove_path_prefix(filename,"/sd"));
+                float filesize = (float)file.size() / 1024.0;
                 if (!file)
                 {
                    //Serial.println("[文件管理]file无法打开文件");
@@ -350,16 +363,22 @@ void Appwenjian::setup()
                     LittleFS.remove(combinePath(directoryname,getFileName(filename)));
                     break;
                 }
-                display.clearScreen();
-                u8g2Fonts.setCursor(1,35);
-                unsigned int a = millis();
-                hal.copy(newfile,file);
-                u8g2Fonts.printf("耗时:%dms",millis()-a);
-                display.display(true);
+                unsigned long begin = millis();
+                if(!hal.copy(newfile,file)){
+                    GUI::msgbox("提示","复制失败!");
+                    LittleFS.remove(combinePath(directoryname,getFileName(filename)));
+                }else{
+                    unsigned long usetime = millis() - begin;
+                    char buf[512];
+                    sprintf(buf,"从TF卡复制 %s 到littlefs,\n耗时:%0.1f S\n速度:%0.2f KB/S", getFileName(filename), (float)usetime / 1000.0, filesize / ((float)usetime / 1000.0));
+                    GUI::info_msgbox("提示",buf);
+                    delay(1500);
+                }
             } 
             else if (strncmp(filename, "/littlefs/", 10) == 0) {
                 newfile = SD.open(combinePath(directoryname,getFileName(filename)),"w");
                 file = LittleFS.open(remove_path_prefix(filename,"/littlefs"));
+                float filesize = (float)file.size() / 1024.0;
                 if (!file)
                 {
                    //Serial.println("[文件管理]file无法打开文件");
@@ -372,15 +391,20 @@ void Appwenjian::setup()
                    LOG("\033[31m无法打开文件%s\033[32m\n",combinePath(directoryname,getFileName(filename)));
                    F_LOG("无法打开文件%s",combinePath(directoryname,getFileName(filename)));
                 }
-                display.clearScreen();
-                u8g2Fonts.setCursor(1,35);
-                unsigned int a = millis();
-                hal.copy(newfile,file);
-                u8g2Fonts.printf("耗时:%dms",(millis()-a));
-                display.display(true);
+                unsigned long begin = millis();
+                if(!hal.copy(newfile,file)){
+                    GUI::msgbox("提示","复制失败!");
+                    SD.remove(combinePath(directoryname,getFileName(filename)));
+                }else{
+                    unsigned long usetime = millis() - begin;
+                    char buf[512];
+                    sprintf(buf,"从littlefs复制 %s 到TF卡,\n耗时:%0.1f S\n速度:%0.2f KB/S", getFileName(filename), (float)usetime / 1000.0, filesize / ((float)usetime / 1000.0));
+                    GUI::info_msgbox("提示",buf);
+                    delay(1500);
+                }
             }
-            newfile.close();
-            file.close();
+            //newfile.close();
+            //file.close();
             }
             break;
         case 3:
@@ -403,40 +427,50 @@ void Appwenjian::setup()
         case 4:
             {  
                 bool OK = false;
-            if(GUI::msgbox_yn("提示","删除的为","文件夹","文件") == false)
-            {
-                if(GUI::msgbox_yn("提示","确定删除") == false)
+                char info[256];
+                if(GUI::msgbox_yn("提示","删除的为","文件夹","文件") == false)
                 {
-                    break;
+                    if(GUI::msgbox_yn("提示","确定删除") == false)
+                    {
+                        break;
+                    }else{
+                        if(GUI::msgbox_yn("提示","确定删除", "取消", "确定") == false){
+                            if (strncmp(filename, "/sd/", 4) == 0) {
+                                OK = SD.remove(remove_path_prefix(filename,"/sd"));
+                            } 
+                            else if (strncmp(filename, "/littlefs/", 10) == 0) {
+                                OK = LittleFS.remove(remove_path_prefix(filename,"/littlefs"));
+                            }
+                            if(OK){
+                                sprintf(info,"成功删除%s",filename);
+                                GUI::msgbox("提示", info);
+                            }else{
+                                sprintf(info,"无法删除%s",filename);
+                                GUI::msgbox("提示", info);
+                            }
+                        }
+                    }
                 }else{
-                    if (strncmp(filename, "/sd/", 4) == 0) {
-                        OK = SD.remove(remove_path_prefix(filename,"/sd"));
-                    } 
-                    else if (strncmp(filename, "/littlefs/", 10) == 0) {
-                        OK = LittleFS.remove(remove_path_prefix(filename,"/littlefs"));
+                    selctwenjianjia(true);
+                    if(GUI::msgbox_yn("提示","确定删除") == false)
+                    {
+                        break;
+                    }else{
+                        if(GUI::msgbox_yn("提示","确定删除", "取消", "确定") == false){
+                            if (strncmp(filename, "/sd/", 4) == 0) {
+                                //OK = SD.rmdir(directoryname);
+                                String dirname = "/sd" + String(directoryname);
+                                dirname[dirname.length() - 1] = '\0';
+                                hal.rm_rf(dirname.c_str());
+                            } else if (strncmp(filename, "/littlefs/", 10) == 0) {
+                                //OK = LittleFS.rmdir(directoryname);
+                                String dirname = "/littlefs" + String(directoryname);
+                                dirname[dirname.length() - 1] = '\0';
+                                hal.rm_rf(dirname.c_str());
+                            }
+                        }
                     }
                 }
-            }else{
-                selctwenjianjia();
-                if(GUI::msgbox_yn("提示","确定删除") == false)
-                {
-                    break;
-                }else{
-                    if (strncmp(filename, "/sd/", 4) == 0) {
-                        OK = SD.rmdir(directoryname);
-                    } 
-                    else if (strncmp(filename, "/littlefs/", 10) == 0) {
-                        OK = LittleFS.rmdir(directoryname);
-                    }
-                }
-            }
-            if(!OK)
-            {
-                GUI::msgbox("错误","删除失败!");
-                LOG("\033[33mremove %s error\033[32m\n",filename);
-                F_LOG("file remove %s error",filename);
-            }else{
-                LOG("\033[33mremove %s\033[32m\n",filename);}
             }
             break;
         case 5:
@@ -530,6 +564,23 @@ const char* Appwenjian::remove_path_prefix(const char* path, const char* prefix)
     return path;
 }
 
+const char* Appwenjian::getDirectoryPath(const char* filePath) {
+    // 找到最后一个斜杠的位置
+    const char* lastSlash = strrchr(filePath, '/');
+    if (lastSlash != nullptr) {
+        // 计算目录路径的长度
+        size_t dirLength = lastSlash - filePath;
+        // 分配内存存储目录路径
+        char* dirPath = new char[dirLength + 1];
+        strncpy(dirPath, filePath, dirLength);
+        dirPath[dirLength] = '\0';
+        return dirPath;
+    } else {
+        // 如果没有找到斜杠，返回根目录或空字符串
+        return "";
+    }
+}
+
 const char* Appwenjian::get_houzhui(const char* filename) {
     const char* dot = strrchr(filename, '.'); // 找到最后一个 '.' 的位置
     if (!dot || dot == filename) { // 如果找不到 '.' 或者 '.' 是第一个字符
@@ -548,6 +599,7 @@ void Appwenjian::openfile()
             if(GUI::msgbox_yn("提示","将会覆盖原有记录的文件名"))
             {
                 hal.pref.putBytes(SETTINGS_PARAM_LAST_EBOOK, filename, strlen(filename));
+                hal.pref.putInt(SETTINGS_PARAM_LAST_EBOOK_PAGE, 0);
                 hasToApp = true;
                 toApp = "ebook";
                 appManager.gotoApp(toApp.c_str());
@@ -594,17 +646,17 @@ void Appwenjian::openfile()
         display.display();
         while (1)
         {
-            if(hal.btnr.isPressing())
+            if(digitalRead(PIN_BUTTONR) == 1)
             {
                 appManager.noDeepSleep = false;
                 hal.powerOff(false);
                 esp_deep_sleep_start();
             }
-            if(hal.btnc.isPressing())
+            if(digitalRead(PIN_BUTTONC) == 1)
             {
                 break;
             }
-            delay(100);
+            hal.wait_input();
         }
     }
     else if(strcmp(houzhui, "bmp") == 0 || strcmp(houzhui, "BMP") == 0)
@@ -628,7 +680,7 @@ void Appwenjian::openfile()
             {
                 break;
             }
-            delay(100);
+            hal.wait_input();
         }
     }else if(strcmp(houzhui, "JPG") == 0 || strcmp(houzhui, "jpg") == 0){
         display.clearScreen();
@@ -650,35 +702,93 @@ void Appwenjian::openfile()
             {
                 break;
             }
-            delay(100);
+            hal.wait_input();
         }
+    }else if(strcmp(houzhui, "LUA") == 0 || strcmp(houzhui, "lua") == 0){
+        setPath(filepath);
+        Serial.printf("pach:%s\n", filepath);
+        String _str = "./" + (String)getFileName(filename);
+        String _str2 = (String)filepath + "/conf.lua";
+        const char* _file = _str.c_str();
+        Serial.println("准备运行Lua脚本...");
+        if (file_exist(_str2.c_str())){
+            Serial.printf("存在配置文件%s，加载配置文件...\n", _str2.c_str());
+            closeLua();
+            openLua_simple();
+            lua_pushinteger(L, 0);
+            lua_setglobal(L, "peripherals_requested");
+            lua_execute(_str2.c_str());
+            lua_getglobal(L, "peripherals_requested");
+            if (lua_isinteger(L, -1)){
+                //peripherals_requested = lua_tointeger(L, -1);
+                peripherals.load(lua_tointeger(L, -1));
+            }
+            lua_settop(L, 0);
+            closeLua();
+        }
+        Serial.printf("目标运行脚本: %s\n", getRealPath(_file));
+        closeLua();
+        openLua();
+        if (file_exist(getRealPath(_file)))
+        {
+            lua_execute(_file);
+            
+            lua_getglobal(L, "setup");
+            if (lua_isfunction(L, -1))
+            {
+                lua_call(L, 0, 0);
+            }
+        }
+        GUI::info_msgbox("提示", "lua脚本执行完毕", 136, 32);
+        hal.wait_input();
     }else {
         GUI::msgbox("提示","文件格式没有支持的显示或处理方式，使用16进制(bin)模式打开");
         openbin();
     }
 }
 
-void Appwenjian::selctwenjianjia()
+void Appwenjian::selctwenjianjia(bool _file)
 {
 
     directorylist.clear();
     File root, file;
-    if (strncmp(filename, "/sd/", 4) == 0) {
-        root = LittleFS.open("/");
-        if (!root)
-        {
-            LOG("\033[33mroot未打开\033[32m\n");
+    if (_file){
+        if (strncmp(filename, "/sd/", 4) == 0) {
+            root = SD.open("/");
+            if (!root)
+            {
+                LOG("\033[33mroot未打开\033[32m\n");
+            }
+            file = root.openNextFile();
+        } 
+        else if (strncmp(filename, "/littlefs/", 10) == 0) {
+            root = LittleFS.open("/");
+            if (!root)
+            {
+                LOG("\033[33mroot未打开\033[32m\n");
+            }
+            file = root.openNextFile();
         }
-        file = root.openNextFile();
-    } 
-    else if (strncmp(filename, "/littlefs/", 10) == 0) {
-        root = SD.open("/");
-        if (!root)
-        {
-            LOG("\033[33mroot未打开\033[32m\n");
+    }else
+    {
+        if (strncmp(filename, "/sd/", 4) == 0) {
+            root = LittleFS.open("/");
+            if (!root)
+            {
+                LOG("\033[33mroot未打开\033[32m\n");
+            }
+            file = root.openNextFile();
+        } 
+        else if (strncmp(filename, "/littlefs/", 10) == 0) {
+            root = SD.open("/");
+            if (!root)
+            {
+                LOG("\033[33mroot未打开\033[32m\n");
+            }
+            file = root.openNextFile();
         }
-        file = root.openNextFile();
     }
+    GUI::info_msgbox("提示", "正在创建文件夹列表...");
     while (file)
     {
         String name = file.name();
@@ -691,10 +801,12 @@ void Appwenjian::selctwenjianjia()
     }
     root.close();
 
-    menu_item *fileList = new menu_item[directorylist.size() + 2];
+    menu_item *fileList = new menu_item[directorylist.size() + 3];
     fileList[0].title = "使用默认";
     fileList[0].icon = NULL;
-    int i = 1;
+    fileList[1].title = "根目录";
+    fileList[1].icon = NULL;
+    int i = 2;
     std::list<String>::iterator it;
     for (it = directorylist.begin(); it != directorylist.end(); ++it)
     {
@@ -709,8 +821,10 @@ void Appwenjian::selctwenjianjia()
     {
         delete fileList;
         directoryname = "/userdat/";
-    }
-    else
+    }else if (appIdx == 1){
+        delete fileList;
+        directoryname = "/";
+    }else
     {
         /*static char result[256]; 
         strcat(result, "/");

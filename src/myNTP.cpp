@@ -58,6 +58,7 @@ static time_t getNtpTime()
 
 void NTPSync()
 {
+    hal.cheak_firmware_update();
     time_t timenow;
     int count = 0;
     timenow = getNtpTime();

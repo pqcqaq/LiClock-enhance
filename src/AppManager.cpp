@@ -182,6 +182,7 @@ void AppManager::showAppList(int page)
         int16_t x = 294;
         // 电池
         display.drawXBitmap(x - 20, 0, getBatteryIcon(), 20, 16, 0);
+        display.fillRect(x - 17, 6, (hal.VCC - 2900) / 100, 4, GxEPD_BLACK);
         x -= 20 - 2;
         // 电池电量数值
         u8g2Fonts.setCursor(x - 44, 12);
@@ -250,6 +251,33 @@ AppBase *AppManager::appSelector(bool showHidden)
     showAppList(currentPage);
     display.drawRoundRect(4 - 1, 21 - 2, 50, 50, 5, 0); // 绘制选择框
     display.display(true);
+    if (hal.has_new_firmware){
+        char buf[128];
+        sprintf(buf, "有新版本%s，是否查看更新内容？", hal.update_version);
+        if (GUI::msgbox_yn("版本检查器", buf)){
+            GUI::last_buffer_idx = display.current_buffer_idx;
+            display.swapBuffer(2);
+            display.copyBuffer(2, GUI::last_buffer_idx);
+            display.clearScreen();
+            GUI::drawWindowsWithTitle("更新信息");
+            for (int i = 0; i < hal.update_info_num; i++){
+                sprintf(buf, "%d.%s", i + 1, hal.update_info[i]);
+                u8g2Fonts.setCursor(4, 15 + ((i + 1) * 14));
+                u8g2Fonts.print(buf);    
+            }
+            u8g2Fonts.setCursor(4, u8g2Fonts.getCursorY() + 14);
+            u8g2Fonts.print("网页烧录详见：");  
+            u8g2Fonts.setCursor(4, u8g2Fonts.getCursorY() + 14);
+            u8g2Fonts.print(hal.update_url[0]);
+            display.display();
+        }
+        while (!hal.btnl.isPressing() && !hal.btnr.isPressing() && !hal.btnc.isPressing())
+        {
+            delay(100);
+        }
+        display.swapBuffer(GUI::last_buffer_idx);
+        display.display(true);
+    }
     // 下面是选择
     hal.hookButton();
     while (finished == false)

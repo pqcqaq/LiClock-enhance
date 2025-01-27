@@ -4,6 +4,8 @@
 U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 GxEPD2_BW<GxEPD2_290, GxEPD2_290::HEIGHT> display(GxEPD2_290(/*CS=5*/ CONFIG_SPI_CS, /*DC=*/CONFIG_PIN_DC, /*RST=*/CONFIG_PIN_RST, /*BUSY=*/CONFIG_PIN_BUSY)); // 注意：此类略微修改过，使用两个缓冲区
 DynamicJsonDocument config(1024);
+DynamicJsonDocument cfu(2048);
+
 
 void task_appManager(void *)
 {
@@ -20,7 +22,7 @@ void setup()
     hal.init();
     hal.update();
     esp_reset_reason_t reset_reason = esp_reset_reason();
-    if(reset_reason == ESP_RST_POWERON)
+    if(reset_reason == ESP_RST_POWERON && config[autontpsync] == "1")
     {
         hal.autoConnectWiFi();
         NTPSync();

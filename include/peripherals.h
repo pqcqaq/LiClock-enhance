@@ -27,13 +27,14 @@ public:
     void initSGP();                             // 初始化SGP30
     uint16_t checkAvailable(uint16_t bitmask); // 检测请求的外设是否存在，如果存在则返回0,否则返回缺失的外设
     bool load(uint16_t bitmask);           // 按照bitmask加载外设
+    void load_append(uint16_t bitmask);
+    void tf_unload(bool save_power);
     void sleep();                              // 进入休眠模式，禁用所有外设
     void wakeup();                             // 尝试从休眠模式恢复之前的状态
     bool isSDLoaded()
     {
         return (peripherals_load & PERIPHERALS_SD_BIT) == PERIPHERALS_SD_BIT;
     }
-    void load_append(uint16_t bitmask);
     // 下面是传感器实例
     Adafruit_AHTX0 aht;
     Adafruit_BMP280 bmp;

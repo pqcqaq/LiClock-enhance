@@ -1589,6 +1589,36 @@ Blockly.Blocks['common_analogread'] = {
   }
 };
 
+Blockly.Blocks['common_adc_attenuation'] = {
+  init: function() {
+    this.appendValueInput("pin")
+        .setCheck("Number")
+        .appendField("设置");
+      this.appendDummyInput()
+        .appendField("管脚ADC衰减为")
+        .appendField(new Blockly.FieldDropdown([["0db","0"], ["2.5db","1"], ["6db","2"], ["11db","3"]]), "NAME");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(15);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['common_adc_bit'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("设置ADC位数为")
+        .appendField(new Blockly.FieldDropdown([["9bit","9"], ["10bit","10"], ["11bit","11"], ["12bit","12"]]), "NAME");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(15);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
 Blockly.Blocks['common_pinmode'] = {
   init: function() {
     this.appendValueInput("pin")
@@ -1596,7 +1626,7 @@ Blockly.Blocks['common_pinmode'] = {
         .appendField("设置");
     this.appendDummyInput()
         .appendField("管脚功能为")
-        .appendField(new Blockly.FieldDropdown([["输出","0x03"], ["输入上拉","0x05"], ["输入下拉","0x09"], ["开漏","0x10"], ["开漏输出","0x12"], ["模拟输出","0xC0"]]), "NAME");
+        .appendField(new Blockly.FieldDropdown([["输入","0x01"], ["输出","0x03"], ["输入上拉","0x05"], ["输入下拉","0x09"], ["开漏","0x10"], ["开漏输出","0x12"], ["启用上拉电阻","0x04"], ["启用下拉电阻","0x08"], ["模拟输出","0xC0"]]), "NAME");
     this.setInputsInline(true);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
@@ -1640,6 +1670,19 @@ lua.luaGenerator.forBlock['common_digitalwrite'] = function(block, generator) {
 lua.luaGenerator.forBlock['common_digitalread'] = function(block, generator) {
   var value_pin = generator.valueToCode(block, 'pin', lua.Order.ATOMIC);
   var code = 'digitalRead(' + value_pin + ')';
+  return [code, lua.Order.ATOMIC];
+};
+
+lua.luaGenerator.forBlock['common_adc_attenuation'] = function(block, generator) {
+  var value_pin = generator.valueToCode(block, 'pin', lua.Order.ATOMIC);
+  var attenuation = block.getFieldValue('NAME');
+  var code = 'analogSetPinAttenuation(' + value_pin + ',' + attenuation + ')\n';
+  return [code, lua.Order.ATOMIC];
+};
+
+lua.luaGenerator.forBlock['common_adc_bit'] = function(block, generator) {
+  var bit = block.getFieldValue('NAME');
+  var code = 'analogReadResolution(' + bit + ')\n';
   return [code, lua.Order.ATOMIC];
 };
 

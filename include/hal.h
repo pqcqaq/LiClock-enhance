@@ -10,9 +10,11 @@ public:
     void loadConfig();
     void getTime();
     char* get_char_sha_key(const char *str);
+    void cheak_firmware_update();
     void WiFiConfigSmartConfig();
     void WiFiConfigManual();
     void ReqWiFiConfig();
+    void wait_input();
     /**
      * @brief 初始化
      * @return true 需要全屏刷新
@@ -27,7 +29,7 @@ public:
     int getNTPMinute();
     void checkNightSleep();
     void setWakeupIO(int io1, int io2);
-    void copy(File &newFile, File &file);
+    bool copy(File &newFile, File &file);
     void rm_rf(const char *path);
     struct tm timeinfo;
     time_t now;
@@ -40,12 +42,17 @@ public:
     int32_t last_update_delta = 0x7FFFFFFF; // 上次更新时修正时间与实际时间的差值
     Preferences pref;
     int16_t VCC = 0;
+    bool btn_activelow = true;
     bool USBPluggedIn = false;
     bool isCharging = false;
+    u8_t update_info_num;
+    bool has_new_firmware = false;
+    bool is_big_update = false;
+    bool isbeta = false;
+    char update_url[2][128], update_info[10][256], update_version[32];
     OneButton btnr = OneButton(PIN_BUTTONR);
     OneButton btnl = OneButton(PIN_BUTTONL);
     OneButton btnc = OneButton(PIN_BUTTONC);
-    bool btn_activelow = true;
     void hookButton()
     {
         _hookButton = true;

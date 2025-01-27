@@ -1,8 +1,6 @@
 #include "AppManager.h"
 #include "DS3231.h"
 
-#define code_version "2.0.10.9"
-
 DS3231 Srtc;
 static const uint8_t settings_bits[] = {
     0x00, 0x00, 0xf0, 0x00, 0x00, 0x00, 0xfc, 0x03, 0x00, 0x00, 0xff, 0x03,
@@ -80,6 +78,7 @@ static const menu_item settings_menu_other[] =
         {NULL, "cpufreq set"},
         {NULL, "自动休眠电压"},
         {NULL, "长按时间"},
+        {NULL, "按键音设置"},
         {NULL, NULL},
 };
 
@@ -170,10 +169,7 @@ void AppSettings::setup()
             u8g2Fonts.setCursor(5,90);
             u8g2Fonts.printf("可用空间：%.2fMB",cardSizetotal - cardSizeuse);
             display.display();
-            while (digitalRead(PIN_BUTTONL) == 0 & digitalRead(PIN_BUTTONR) == 0 & digitalRead(PIN_BUTTONC) == 0)
-            {
-                delay(1000);
-            }
+            hal.wait_input();
             }
             break;
         case 6:
@@ -199,10 +195,7 @@ void AppSettings::setup()
             u8g2Fonts.printf("原作者:小李电子实验室 chip model:%s", ESP.getChipModel());
             u8g2Fonts.drawUTF8(5,120,"开源程序网址:https://github.com/diylxy/LiClock");
             display.display();
-            while (!hal.btnl.isPressing() && !hal.btnr.isPressing() && !hal.btnc.isPressing())
-            {
-                delay(1000);
-            }
+            hal.wait_input();
         }
         break;
         default:
@@ -731,6 +724,39 @@ void AppSettings::menu_other()
                 hal.pref.putInt("lpt", long_pres_time / 10);
             }
             break;
+        case 14:
+            {
+                static const menu_select settings_btn_buz[] =
+                {
+                    {false, "返回"},
+                    {true, "按键音"},
+                    {false, "声音频率"},
+                    {false, "声音长度"},
+                    {false, NULL}
+                };
+                int res = 0;
+                bool end = false;
+                while (!end){
+                    res = GUI::select_menu("按键音设置", settings_btn_buz);
+                    switch (res)
+                    {
+                        case 0:
+                            end = true;
+                            break;
+                        case 1:
+                            break;
+                        case 2:
+                            hal.pref.putInt("btn_buz_freq", GUI::msgbox_number("输入频率Hz", 5, hal.pref.getInt("btn_buz_freq", 150)));
+                            break;
+                        case 3:
+                            hal.pref.putInt("btn_buz_time", GUI::msgbox_number("输入时长ms", 5, hal.pref.getInt("btn_buz_time", 100)));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            break;            
         default:
             break;
         }

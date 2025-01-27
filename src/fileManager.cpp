@@ -68,7 +68,6 @@ namespace GUI
     char filedialog_buffer[300];
     void push_buffer();
     void pop_buffer();
-    // 注意，下面这个函数完全没有考虑线程安全，no reentrent!!!
     const char *fileDialog(const char *title, bool isApp, const char *endsWidth, const char *gotoendsWidth)
     {
         // 首先选择文件系统
