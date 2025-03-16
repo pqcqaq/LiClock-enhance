@@ -186,7 +186,7 @@ void AppEBook::setup()
                 page_changed = true;
             }
         }
-        if (hal.btnr.isPressing() || ((hal.pref.getBool(hal.get_char_sha_key("根据唤醒源翻页")) && esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT1) && ebook_run == true || (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER && hal.pref.getBool(hal.get_char_sha_key("自动翻页")))))
+        if (hal.btnr.isPressing() || ((hal.pref.getBool(hal.get_char_sha_key("根据唤醒源翻页")) && esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT1) && ebook_run == true || (esp_sleep_get_wakeup_cause() == (esp_sleep_wakeup_cause_t)ESP_SLEEP_WAKEUP_TIMER && hal.pref.getBool(hal.get_char_sha_key("自动翻页")))))
         {
             if (GUI::waitLongPress(PIN_BUTTONR)){
                 Serial.println("打开菜单");

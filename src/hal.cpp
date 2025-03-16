@@ -203,7 +203,8 @@ static void cheak_freq()
 #define url_is_test 0
 #define url_test "http://192.168.101.12:5500/firmware-info.json"
 #define url_firmware "https://kanfandelong.github.io/liclock-web-flash/firmware-info.json"
-const char* root_ca= \
+#define CAcert_file "/System/_.github.io.crt"
+/* const char* root_ca= \
 "-----BEGIN CERTIFICATE-----\n" \
 "MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh\n" \
 "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n" \
@@ -225,7 +226,7 @@ const char* root_ca= \
 "8rGOmaFvE7FBcf6IKshPECBV1/MUReXgRPTqh5Uykw7+U0b6LJ3/iyK5S9kJRaTe\n" \
 "pLiaWN0bfVKfjllDiIGknibVb63dDcY3fe0Dkhvld1927jyNxF1WW6LZZm6zNTfl\n" \
 "MrY=\n" \
-"-----END CERTIFICATE-----";
+"-----END CERTIFICATE-----"; */
 bool firmware_cheak = false;
 void HAL::cheak_firmware_update(){
     log_i("开始检查固件更新...");
@@ -234,11 +235,38 @@ void HAL::cheak_firmware_update(){
     else
         GUI::info_msgbox("提示", "检查固件更新...");
     HTTPClient http;
+    char* ca_cert;
+    if (LittleFS.exists(CAcert_file)){
+        File CAcert = LittleFS.open(CAcert_file, "r");
+        // 计算动态缓冲区大小（考虑CRLF可能被替换为LF）
+        size_t file_size = CAcert.size();
+        // 假设每个CRLF可能被替换为LF，最大需要file_size * 2的空间（极端情况）
+        ca_cert = new (std::nothrow) char[file_size + 1]; // +1为终止符
+          // 读取证书内容并替换CRLF为LF
+        size_t index = 0;
+        while (CAcert.available()) {
+            char c = CAcert.read();
+            if (c == '\r' && CAcert.peek() == '\n') {
+                // 遇到CRLF，替换为LF
+                ca_cert[index++] = '\n';
+                CAcert.read(); // 跳过下一个字符（\n）
+            } else {
+                ca_cert[index++] = c;
+            }
+            // 防止缓冲区溢出
+            if (index >= file_size * 2) {
+                Serial.println("缓冲区溢出，证书可能被截断");
+                break;
+            }
+        }
+        ca_cert[index] = '\0'; // 添加终止符
+    }
+    log_i("CAcert: \n%s", ca_cert);
     http.setTimeout(20000); 
     if (url_is_test)
         http.begin((String)url_test);
     else
-        http.begin((String)url_firmware, root_ca);
+        http.begin((String)url_firmware, ca_cert);
     int httpCode = http.GET();
     run:
     if (httpCode == HTTP_CODE_OK){
