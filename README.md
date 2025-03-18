@@ -1,5 +1,9 @@
 # <center>LiClock 墨水屏天气时钟
 ###  **使用烧录工具烧录发行版固件时不要勾选DoNotChgBin选项,可能会导致程序不运行,使用烧录工具烧录后需要按下复位键** 
+###  **关于此固件的反馈渠道** 
+- QQ群号1040386994
+- 在交流群中@我，发送串口报错信息和log.txt文件
+- 发送串口报错信息和log.txt文件我的邮箱，jiangzihan192959@outlook.com或本人的邮箱QQ邮箱
 ###  **关于发行版** 
 - 基于2.0.10修改，兼容新旧版硬件，群主原工程地址[https://github.com/diylxy/LiClock](https://github.com/diylxy/LiClock)
 - 网页固件烧录地址[https://kanfandelong.github.io/liclock-web-flash/](https://kanfandelong.github.io/liclock-web-flash/)
@@ -22,11 +26,6 @@
 - 左键是蛇头逆时针旋转，右键顺时针
 - 中键为菜单
 - 提高CPU频率会提高运行速度 
-### BUG反馈
-- 如果有报错重启请将报错时串口输出的寄存器值以及堆栈发送给我，（仅限最新版本）
--  **反馈渠道** 
-- 在交流群中@我，并私聊发送串口输出的寄存器值以及堆栈
-- 发送串口输出的寄存器值以及堆栈信息至我的邮箱，jiangzihan192959@outlook.com
 ### <center>一种兼具易用性与扩展性的多功能墨水屏天气时钟 
 ![封面](images/封面.png)
 ## <center>硬件购买注意事项
