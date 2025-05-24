@@ -67,13 +67,13 @@ typedef struct
     const uint8_t *data;
     uint16_t width;
     uint16_t height;
-} ico_desc;
+} image_desc;
 
 extern float rain_data_raw[];
 extern int ydata[];
-extern const ico_desc weather_icons_day[];
-extern const ico_desc weather_frames[4];
-extern const ico_desc weather_icons_night[];
+extern const image_desc weather_icons_day[];
+extern const image_desc weather_frames[4];
+extern const image_desc weather_icons_night[];
 
 extern esp_ip6_addr_t ipv6global;
 extern esp_ip6_addr_t ipv6local;
