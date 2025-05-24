@@ -11,9 +11,12 @@ missing_dims = []
 # 正则表达式
 dim_pattern = re.compile(r"//\s*w(\d+)h(\d+)", re.IGNORECASE)
 var_pattern = re.compile(
-    r"(//\s*w\d+h\d+\s*)?"                                  # 可选尺寸注释
-    r"(static\s+const\s+unsigned\s+char\s+(\w+)\[\]\s*=\s*\{)",  # 变量声明开头
-    re.MULTILINE)
+    r"(//\s*w\d+h\d+\s*)?"                                      # 可选尺寸注释
+    r"(?:(extern|static)\s+)?"                                  # 可选 extern 或 static
+    r"(const\s+(?:unsigned\s+char|uint8_t))\s+"                 # 类型声明：const unsigned char 或 const uint8_t
+    r"(\w+)\s*\[\]\s*=\s*\{",                                   # 变量名 + 数组 + 初始化开始
+    re.MULTILINE
+)
 
 hex_data_pattern = re.compile(r"0x[0-9a-fA-F]{2}")
 
@@ -43,10 +46,10 @@ def cpp_to_bmp(folder):
             content = f.read()
 
         for match in var_pattern.finditer(content):
-            full_match = match.group(0)
-            comment = match.group(1)
-            var_name = match.group(3)
-            var_start = match.end(2)
+            comment = match.group(1)  # 可选尺寸注释
+            var_name = match.group(4)  # 变量名
+            var_start = match.end(0)  # 变量声明结束位置（初始化大括号开始）
+
             var_block = extract_variable_block(content, var_start)
 
             if not var_block:
@@ -97,7 +100,7 @@ def cpp_to_bmp(folder):
             print(f" - 文件: {path} 中变量名: {name}")
 
 if __name__ == "__main__":
-    target_dir = input("请输入要扫描的目录路径：").strip()
+    target_dir = Path("src")
     if not os.path.isdir(target_dir):
         print("无效目录！")
     else:

@@ -42,7 +42,7 @@ def bmp_to_xbm_data(bmp_path):
         define_w = f"#define {var_name}_width {width}"
         define_h = f"#define {var_name}_height {height}"
         commit_wh = f"// w{width}h{height} name:{name}"
-        array_def = f"static const unsigned char {var_name}[] = {{\n    {hex_data}\n}};"
+        array_def = f"const unsigned char {var_name}[] = {{\n    {hex_data}\n}};"
 
         return var_name, width, height, define_w, define_h, commit_wh, array_def
 
@@ -73,10 +73,10 @@ def generate_cpp_and_header():
         # 完整路径，文件名等信息
         header_lines.append(f"// {commit_wh}, file: {bmp}")
         header_lines.append(f"extern const unsigned char {var_name}[];")
-        header_lines.append(f"extern const unsigned int {var_name}_width;")
-        header_lines.append(f"extern const unsigned int {var_name}_height;")
+        header_lines.append(f"#define {var_name}_width {w}")
+        header_lines.append(f"#define {var_name}_height {h}")
         header_lines.append(f"\n")
-        cpp_lines.extend([define_w, define_h, commit_wh, array_def, ""])
+        cpp_lines.extend([commit_wh, array_def, ""])
         image_entries.append(f"    {{{var_name}, {w}, {h}}},")
 
     header_lines.append("")
