@@ -77,7 +77,7 @@ def generate_cpp_and_header():
         header_lines.append(f"#define {var_name}_height {h}")
         header_lines.append(f"\n")
         cpp_lines.extend([commit_wh, array_def, ""])
-        image_entries.append(f"    {{{var_name}, {w}, {h}}},")
+        image_entries.append(f"    {{{var_name}, {var_name}_width, {var_name}_height}},")
 
     header_lines.append("")
     header_lines.append("extern const image_desc images[];")
