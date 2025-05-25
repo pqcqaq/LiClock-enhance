@@ -388,9 +388,10 @@ AppBase *AppManager::appSelector(bool showHidden)
     else
     {
         display.clearScreen();
-        display.setCursor(60, 72);
-        display.setFont(&FreeSans18pt7b);
-        display.print("Loading...");
+        // display.setCursor(60, 72);
+        // display.setFont(&FreeSans18pt7b);
+        // display.print("Loading...");
+        display.drawXBitmap(0, 0, loading_bits, loading_bits_width, loading_bits_height, 0);
         display.display(true);
         display.swapBuffer(0);
     }

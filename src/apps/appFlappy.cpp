@@ -1,11 +1,13 @@
 #include "AppManager.h"
+#include "images/images.h"
 
 class AppFlappy : public AppBase {
 public:
     AppFlappy() {
         name = "flappy";
-        title = "像素点小鸟";
+        title = "flappy";
         description = "右键跳跃，穿越障碍";
+        image = flappy_bits;
     }
 
     void setup() override {

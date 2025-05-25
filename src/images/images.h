@@ -1,7 +1,16 @@
 // Auto-generated images.h
-#include <A_Config.h>
+#ifndef IMAGES_H
+#define IMAGES_H
+#include <stdint.h>
 
 
+typedef struct
+{
+    const uint8_t *data;
+    uint16_t width;
+    uint16_t height;
+} image_desc;
+        
 // // w32h32 name:APP_installer, file: images\appInstaller\APP_installer.bmp
 extern const unsigned char APP_installer_bits[];
 #define APP_installer_bits_width 32
@@ -128,6 +137,12 @@ extern const unsigned char ebook_bits[];
 #define ebook_bits_height 32
 
 
+// // w32h32 name:flappy, file: images\flappy\flappy.bmp
+extern const unsigned char flappy_bits[];
+#define flappy_bits_width 32
+#define flappy_bits_height 32
+
+
 // // w28h22 name:fog, file: images\graph\fog.bmp
 extern const unsigned char fog_bits[];
 #define fog_bits_width 28
@@ -176,6 +191,12 @@ extern const unsigned char imgfile_bits[];
 #define imgfile_bits_height 12
 
 
+// // w296h128 name:loading, file: images\gui_info\loading.bmp
+extern const unsigned char loading_bits[];
+#define loading_bits_width 296
+#define loading_bits_height 128
+
+
 // // w9h12 name:luafile, file: images\fileManager\luafile.bmp
 extern const unsigned char luafile_bits[];
 #define luafile_bits_width 9
@@ -200,6 +221,12 @@ extern const unsigned char no_select_bits[];
 #define no_select_bits_height 12
 
 
+// // w296h128 name:no_wifi_connected, file: images\gui_info\no_wifi_connected.bmp
+extern const unsigned char no_wifi_connected_bits[];
+#define no_wifi_connected_bits_width 296
+#define no_wifi_connected_bits_height 128
+
+
 // // w9h12 name:otherfile, file: images\fileManager\otherfile.bmp
 extern const unsigned char otherfile_bits[];
 #define otherfile_bits_width 9
@@ -210,6 +237,12 @@ extern const unsigned char otherfile_bits[];
 extern const unsigned char power_bits[];
 #define power_bits_width 32
 #define power_bits_height 32
+
+
+// // w296h128 name:poweroff, file: images\gui_info\poweroff.bmp
+extern const unsigned char poweroff_bits[];
+#define poweroff_bits_width 296
+#define poweroff_bits_height 128
 
 
 // // w12h12 name:select, file: images\GUI\select.bmp
@@ -310,4 +343,5 @@ extern const unsigned char wind_bits[];
 
 
 extern const image_desc images[];
-#define IMAGE_COUNT 51
+#define IMAGE_COUNT 55
+#endif // IMAGES_H

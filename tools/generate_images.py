@@ -42,7 +42,7 @@ def bmp_to_xbm_data(bmp_path):
         define_w = f"#define {var_name}_width {width}"
         define_h = f"#define {var_name}_height {height}"
         commit_wh = f"// w{width}h{height} name:{name}"
-        array_def = f"const unsigned char {var_name}[] = {{\n    {hex_data}\n}};"
+        array_def = f"const uint8_t {var_name}[] = {{\n    {hex_data}\n}};"
 
         return var_name, width, height, define_w, define_h, commit_wh, array_def
 
@@ -55,10 +55,20 @@ def generate_cpp_and_header():
 
     header_lines = [
         "// Auto-generated images.h",
-        '#include <A_Config.h>',
+        "#ifndef IMAGES_H",
+        "#define IMAGES_H",
+        # '#include <A_Config.h>',
+        '#include <stdint.h>',
         "",
         # STRUCT_DEF,
-        ""
+        """
+typedef struct
+{
+    const uint8_t *data;
+    uint16_t width;
+    uint16_t height;
+} image_desc;
+        """,
     ]
     cpp_lines = [
         "// Auto-generated images.cpp",
@@ -82,6 +92,8 @@ def generate_cpp_and_header():
     header_lines.append("")
     header_lines.append("extern const image_desc images[];")
     header_lines.append(f"#define IMAGE_COUNT {len(image_entries)}")
+    header_lines.append("#endif // IMAGES_H")
+    cpp_lines.append("")
 
     cpp_lines.append("const image_desc images[] = {")
     cpp_lines.extend(image_entries)

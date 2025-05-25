@@ -17,8 +17,9 @@
 #include <driver/rtc_io.h>
 #include <esp_netif.h>
 #include <LittleFS.h>
+#include "images/images.h"
 
-#define code_version "2.0.10.10"
+#define code_version "2.0.11"
 
 #define SCREEN_WIDTH 296
 #define SCREEN_HEIGHT 128
@@ -62,12 +63,6 @@
 #define TFmode "1"
 #define autontpsync "0"
 #define WeatherClocksource "0"
-typedef struct
-{
-    const uint8_t *data;
-    uint16_t width;
-    uint16_t height;
-} image_desc;
 
 extern float rain_data_raw[];
 extern int ydata[];

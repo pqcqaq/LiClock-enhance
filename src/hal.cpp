@@ -1,5 +1,6 @@
 #include "hal.h"
 #include <LittleFS.h>
+#include "images/images.h"
 
 void task_hal_update(void *)
 {
@@ -464,14 +465,15 @@ void HAL::WiFiConfigManual()
 void HAL::ReqWiFiConfig()
 {
     display.fillScreen(GxEPD_WHITE);
-    u8g2Fonts.setCursor(0, 20);
-    u8g2Fonts.print("无法连接到WiFi");
-    u8g2Fonts.setCursor(0, 40);
-    u8g2Fonts.print("向左:网页配置");
-    u8g2Fonts.setCursor(0, 60);
-    u8g2Fonts.print("向右:SmartConfig");
-    u8g2Fonts.setCursor(0, 80);
-    u8g2Fonts.print("中间:离线模式");
+    // u8g2Fonts.setCursor(0, 20);
+    // u8g2Fonts.print("无法连接到WiFi");
+    // u8g2Fonts.setCursor(0, 40);
+    // u8g2Fonts.print("向左:网页配置");
+    // u8g2Fonts.setCursor(0, 60);
+    // u8g2Fonts.print("向右:SmartConfig");
+    // u8g2Fonts.setCursor(0, 80);
+    // u8g2Fonts.print("中间:离线模式");
+    display.drawXBitmap(0, 0, no_wifi_connected_bits, no_wifi_connected_bits_width, no_wifi_connected_bits_height, 0);
     display.display();
     uint32_t last_millis = millis();
     int a = 0;
@@ -901,14 +903,17 @@ void HAL::goSleep(uint32_t sec)
     }
 }
 
+
+
 void HAL::powerOff(bool displayMessage)
 {
     if (displayMessage)
     {
         display.setFullWindow();
         display.fillScreen(GxEPD_WHITE);
-        u8g2Fonts.setCursor(120, 70);
-        u8g2Fonts.print("已关机");
+        // u8g2Fonts.setCursor(120, 70);
+        // u8g2Fonts.print("已关机");
+        display.drawXBitmap(0, 0, poweroff_bits, poweroff_bits_width, poweroff_bits_height, 0);
         display.display();
     }
     force_full_update = true;

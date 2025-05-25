@@ -3,6 +3,16 @@ from SCons.Script import Import
 
 Import("env")
 
+print("\n>>> Running extra_script.py")
+env.Execute("$PYTHONEXE -m pip list")
+env.Execute("$PYTHONEXE -m pip install pillow")
+
+# Install missed package
+try:
+    import pillow
+except ImportError:
+    env.Execute("$PYTHONEXE -m pip install pillow")
+
 def before_buildfs(source, target, env):
     print("\n>>>  before_buildfs: build-www")
     env.Execute("ruby shared/build-www.rb")
@@ -24,3 +34,18 @@ def after_buildfs(source, target, env):
     pass
 
 env.AddPostAction("buildfs", after_buildfs)
+
+# 在build之前generate_images
+def before_build(source, target, env):
+    from tools import generate_images
+    from tools import normalize_image_name
+    print("\n>>> before_build: normalize_and_group_images")
+    normalize_image_name.normalize_and_group_images()
+    print("\n>>> before_build: convert_jpg_to_bmp")
+    generate_images.convert_jpg_to_bmp()
+    print("\n>>> before_build: generate_cpp_and_header")
+    generate_images.generate_cpp_and_header()
+    print("\n>>> before_build: delete_xbm_files")
+    generate_images.delete_xbm_files()
+
+env.AddPreAction("build", before_build)

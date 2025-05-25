@@ -1,4 +1,23 @@
 {
     "cmake.ignoreCMakeListsMissing": true,
-    "C_Cpp.errorSquiggles": "enabled"
+    "C_Cpp.errorSquiggles": "enabled",
+    "files.associations": {
+        "*.vue": "vue",
+        "*.css": "css",
+        "*.jsx": "javascriptreact",
+        "*.cjson": "jsonc",
+        "*.wxss": "css",
+        "*.wxs": "javascript",
+        "*.json": "jsonc",
+        "array": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "atomic": "cpp",
+        "cstdint": "cpp"
+    }
 }
