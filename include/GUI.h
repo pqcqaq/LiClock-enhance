@@ -15,7 +15,7 @@ typedef struct
 namespace GUI
 {
     extern int last_buffer_idx;
-    bool waitLongPress(int btn); // 检查长按，如果是长按则返回true
+    bool waitLongPress(uint8_t btn, uint16_t timeout_ms = 0); // 检查长按，如果是长按则返回true
     void autoIndentDraw(const char *str, int max_x, int start_x = 2, int fontsize = 13);
     void drawWindowsWithTitle(const char *title = NULL, int16_t x = 0, int16_t y = 0, int16_t w = 296, int16_t h = 128);
     void msgbox(const char *title, const char *msg);

@@ -1,21 +1,39 @@
 #include <A_Config.h>
+
 #include "images/images.h"
 
 namespace GUI {
 int last_buffer_idx = 0;
 /**
- * @brief  确认按键的按下情况
- * @param btn GPIO引脚号
- * @return bool  true:长按，false:非长按
+ * @brief 使用 OneButton + GPIO 实现长按判断
+ * @param pin 按钮所连接的 GPIO 引脚
+ * @param timeout_ms 长按时间阈值（毫秒）
+ * @return true: 是长按；false: 中途松开或未达到
  */
-bool waitLongPress(int btn)  // 检查长按，如果是长按则返回true
-{
-    for (int16_t i = 0; i < hal.pref.getInt("lpt", 25); ++i) {
-        if (digitalRead(btn) == hal.btn_activelow) return false;
+bool waitLongPress(uint8_t pin, uint16_t timeout_ms) {
+    if (timeout_ms == 0) {
+        timeout_ms = hal.pref.getInt("lpt", 250);  // 默认250ms
+    }
+
+    unsigned long start = millis();
+    while (millis() - start < timeout_ms) {
+        // 保持更新按钮状态
+        hal.btnr.tick();
+        hal.btnl.tick();
+        hal.btnc.tick();
+
+        // 按钮松开了
+        if (digitalRead(pin) == hal.btn_activelow) {
+            return false;
+        }
+
         delay(10);
     }
+
+    // 达到时间且未松开，判定为长按
     return true;
 }
+
 // 自动换行
 /**
  * @brief  自动换行文本显示函数
@@ -681,10 +699,7 @@ const char *englishInput(const char *name) {
  * @param pre_value 预设值
  * @return int 返回输入的数字
  */
-int msgbox_number(
-    const char *title, uint16_t digits,
-    int pre_value)  // 注意digits，1表示一位，2表示两位，程序中减一
-{
+int msgbox_number(const char *title, uint16_t digits, int pre_value) {
     constexpr int window_w = 120;
     constexpr int window_h = 48;
     constexpr int start_x = (296 - window_w) / 2;
@@ -693,69 +708,103 @@ int msgbox_number(
     constexpr int input_y = start_y + 18;
     constexpr int input_w = window_w - 10;
     constexpr int input_h = window_h - 18 - 3;
-    unsigned long wait_time = 0;
+
     if (digits <= 0) return 0;
     --digits;
     if (digits > 8) digits = 8;
-    hal.hookButton();
-    push_buffer();
-    int currentNumber = pre_value;
-    int current_digit = digits;  // 0：个位
-    int current_digit_10pow = 1;
-    // 计算当前位置
-    if (current_digit != 0) {
-        for (int i = 0; i < current_digit; ++i) {
-            current_digit_10pow *= 10;
-        }
-    }
-    bool changed = true;
-    wait_time = millis();
-    while (1) {
-        if (hal.btnl.isPressing()) {
-            // 减
-            if (waitLongPress(PIN_BUTTONL)) {
-                if (current_digit == digits) {
-                    current_digit = 0;
-                } else {
-                    current_digit++;
-                }
-            } else {
-                currentNumber -= current_digit_10pow;
-            }
-            changed = true;
-            wait_time = millis();
-        } else if (hal.btnr.isPressing()) {
-            // 加
-            if (waitLongPress(PIN_BUTTONR)) {
-                if (current_digit == 0) {
-                    current_digit = digits;
-                } else {
-                    --current_digit;
-                }
-            } else {
-                currentNumber += current_digit_10pow;
-            }
-            changed = true;
-            wait_time = millis();
-        } else if (hal.btnc.isPressing()) {
-            if (waitLongPress(PIN_BUTTONC)) {
-                currentNumber = pre_value;
-                changed = true;
 
-            } else {
-                break;
-            }
+    // 状态结构体
+    struct ButtonStates {
+        bool btnr_short = false;
+        bool btnr_long = false;
+        bool btnl_short = false;
+        bool btnl_long = false;
+        bool btnc_short = false;
+        bool btnc_long = false;
+    } states;
+
+    // 回调函数
+    auto onBtnrClick = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnr_short = true;
+    };
+    auto onBtnrLong = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnr_long = true;
+    };
+    auto onBtnlClick = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnl_short = true;
+    };
+    auto onBtnlLong = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnl_long = true;
+    };
+    auto onBtncClick = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnc_short = true;
+    };
+    auto onBtncLong = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnc_long = true;
+    };
+
+    // 注册回调
+    hal.hookButton();
+    hal.btnr.attachClick(onBtnrClick, &states);
+    hal.btnr.attachLongPressStart(onBtnrLong, &states);
+    hal.btnl.attachClick(onBtnlClick, &states);
+    hal.btnl.attachLongPressStart(onBtnlLong, &states);
+    hal.btnc.attachClick(onBtncClick, &states);
+    hal.btnc.attachLongPressStart(onBtncLong, &states);
+
+    push_buffer();
+
+    int currentNumber = pre_value;
+    int current_digit = digits;
+    int current_digit_10pow = pow(10, current_digit);
+    bool changed = true;
+    unsigned long wait_time = millis();
+
+    while (true) {
+        hal.btnr.tick();
+        hal.btnl.tick();
+        hal.btnc.tick();
+
+        // 处理按钮事件
+        if (states.btnl_short) {
+            currentNumber -= current_digit_10pow;
+            changed = true;
+            states.btnl_short = false;
+            wait_time = millis();
+        } else if (states.btnl_long) {
+            current_digit = (current_digit + 1) % (digits + 1);
+            changed = true;
+            states.btnl_long = false;
             wait_time = millis();
         }
+
+        if (states.btnr_short) {
+            currentNumber += current_digit_10pow;
+            changed = true;
+            states.btnr_short = false;
+            wait_time = millis();
+        } else if (states.btnr_long) {
+            current_digit = (current_digit == 0) ? digits : current_digit - 1;
+            changed = true;
+            states.btnr_long = false;
+            wait_time = millis();
+        }
+
+        if (states.btnc_short) {
+            states.btnc_short = false;
+            break;
+        } else if (states.btnc_long) {
+            currentNumber = pre_value;
+            changed = true;
+            states.btnc_long = false;
+            wait_time = millis();
+        }
+
+        // 渲染界面
         if (changed) {
-            // 计算当前位置
-            current_digit_10pow = 1;
-            if (current_digit != 0) {
-                for (int i = 0; i < current_digit; ++i) {
-                    current_digit_10pow *= 10;
-                }
-            }
+            current_digit_10pow = pow(10, current_digit);
             changed = false;
+
             display.fillRoundRect(start_x, start_y, window_w, window_h, 3, 1);
             GUI::drawWindowsWithTitle(title, start_x, start_y, window_w,
                                       window_h);
@@ -763,16 +812,19 @@ int msgbox_number(
             display.setFont(&FreeSans9pt7b);
             display.setTextColor(0);
             display.setCursor(input_x + 4, input_y + (input_h - 12) / 2 + 12);
+
             int currentNumber1 = currentNumber;
             if (currentNumber1 < 0) {
                 display.print('-');
                 currentNumber1 = -currentNumber1;
             }
+
             uint8_t tmp[9];
             for (int i = 0; i <= digits; ++i) {
                 tmp[i] = currentNumber1 % 10;
                 currentNumber1 /= 10;
             }
+
             for (int i = digits; i >= 0; --i) {
                 if (i == current_digit) {
                     display.drawFastHLine(display.getCursorX(),
@@ -780,11 +832,14 @@ int msgbox_number(
                 }
                 display.print(tmp[i], DEC);
             }
+
             display.displayWindow(start_x, start_y, window_w, window_h);
         }
+
         delay(10);
         if (millis() - wait_time > 30000) hal.wait_input();
     }
+
     pop_buffer();
     hal.unhookButton();
     display.display();  // 全局刷新一次
@@ -1211,8 +1266,9 @@ void drawBMP(FS *fs, const char *filename, bool partial_update, bool overwrite,
                                                  x++)  // width 修补 w
                                             {
                                                 if (ddxhFirst == 1 ||
-                                                    y != 0)  // 第一次对01234行抖动处理
-                                                             // 后面至抖动1234行
+                                                    y !=
+                                                        0)  // 第一次对01234行抖动处理
+                                                            // 后面至抖动1234行
                                                 {
                                                     if (bmp8[x][y] > 127) {
                                                         err = bmp8[x][y] - 255;
