@@ -45,5 +45,6 @@ def before_build(source, target, env):
     generate_images.generate_cpp_and_header()
     print("\n>>> before_build: delete_xbm_files")
     generate_images.delete_xbm_files()
+    print("\n>>> before_build: auto_replace_generated_vars")
 
 env.AddPreAction("build", before_build)

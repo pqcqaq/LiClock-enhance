@@ -101,7 +101,7 @@ extern const image_desc graph_images[];
 #define GRAPH_IMAGE_COUNT 12
 
 extern const image_desc gui_images[];
-#define GUI_IMAGE_COUNT 2
+#define GUI_IMAGE_COUNT 4
 
 extern const image_desc gui_info_images[];
 #define GUI_INFO_IMAGE_COUNT 3
@@ -111,6 +111,6 @@ extern const image_desc manual_images[];
 
 extern const image_desc images[];
 extern const uint16_t images_count;
-#define IMAGE_COUNT 60
+#define IMAGE_COUNT 62
 
 #endif // IMAGES_H

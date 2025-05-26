@@ -16,6 +16,18 @@ extern const uint8_t select_bits[];
 #define select_height 12
 
 
+// // w20h16, file: images\GUI\wifi_connected.bmp
+extern const uint8_t wifi_connected_bits[];
+#define wifi_connected_width 20
+#define wifi_connected_height 16
+
+
+// // w20h16, file: images\GUI\wifi_disconnected.bmp
+extern const uint8_t wifi_disconnected_bits[];
+#define wifi_disconnected_width 20
+#define wifi_disconnected_height 16
+
+
 extern const image_desc gui_images[];
-#define GUI_IMAGE_COUNT 2
+#define GUI_IMAGE_COUNT 4
 #endif // GUI_IMAGES_H

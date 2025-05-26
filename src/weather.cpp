@@ -73,7 +73,7 @@ void Weather::save()
 
 int8_t Weather::refresh()
 {
-    hal.cheak_firmware_update();
+    // hal.cheak_firmware_update();
     HTTPClient http;
     http.begin(String("http://api.caiyunapp.com/v2.5/96Ly7wgKGq6FhllM/") + config[PARAM_GPS].as<String>() + String("/weather.jsonp?hourlysteps=20&unit=metric%3Av2&dailysteps=4&alert=true")); // HTTP
     http.addHeader("Accept", "*/*");

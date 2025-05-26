@@ -33,7 +33,7 @@ static time_t getNtpTime()
     IPAddress ntpServerIP;
     while (udp.parsePacket() > 0)
         ;
-    WiFi.hostByName("ntp.aliyun.com", ntpServerIP);
+    WiFi.hostByName("cn.ntp.org.cn", ntpServerIP);
     udp.begin(1337);
     sendNTPpacket(ntpServerIP);
     uint32_t beginWait = millis();
@@ -58,7 +58,7 @@ static time_t getNtpTime()
 
 void NTPSync()
 {
-    hal.cheak_firmware_update();
+    // hal.cheak_firmware_update();
     time_t timenow;
     int count = 0;
     timenow = getNtpTime();

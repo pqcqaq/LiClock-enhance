@@ -19,11 +19,16 @@ static const menu_item settings_menu_time[] = {
     {NULL, "在复位为“power on”时自动对时"},
     {NULL, NULL},
 };
-static const menu_item settings_menu_network[] = {
-    {NULL, "返回上一级"},       {NULL, "搜索周围的WIFI"},
-    {NULL, "ESPTouch配网"},     {NULL, "启动HTTP服务器"},
-    {NULL, "ESPNow设备扫描"},   {NULL, "蓝牙扫描"},
-    {NULL, "退出Bilibili账号"}, {NULL, NULL},
+static menu_item settings_menu_network[] = {
+    {NULL, "返回上一级"},
+    {NULL, "当前连接"},
+    {NULL, "搜索周围的WIFI"},
+    {NULL, "ESPTouch配网"},
+    {NULL, "启动HTTP服务器"},
+    {NULL, "ESPNow设备扫描"},
+    {NULL, "蓝牙扫描"},
+    {NULL, "退出Bilibili账号"},
+    {NULL, NULL},
 };
 
 static const menu_item settings_menu_peripheral[] = {
@@ -361,17 +366,28 @@ void AppSettings::menu_alarm() {
 void AppSettings::menu_network() {
     int res = 0;
     bool end = false;
+
     while (end == false && hasToApp == false) {
+        menu_item current_connection;
+        // 如果wifi连接则显示：当前：SSID，否则显示“未连接
+        current_connection.icon = NULL;
+        if (WiFi.status() == WL_CONNECTED) {
+            current_connection.title =
+                (String("当前连接：") + WiFi.SSID()).c_str();
+        } else {
+            current_connection.title = "未连接";
+        }
+        settings_menu_network[1] = current_connection;
         res = GUI::menu("网络设置", settings_menu_network);
         switch (res) {
             case 0:
                 end = true;
                 break;
-            case 1: {
+            case 2: {
+                u8g2Fonts.setCursor(20, 120);
+                u8g2Fonts.printf("正在搜索WIFI...");
+                display.display();
                 WiFi.mode(WIFI_STA);
-                // 在屏幕左下角显示扫描中
-                display.printf(0, 120, "正在搜索WIFI...");
-                display.display(true);
                 hal.searchWiFi();
                 Serial.printf("搜索到的个数:%d", hal.numNetworks);
                 char winfo[hal.numNetworks][64];
@@ -411,23 +427,23 @@ void AppSettings::menu_network() {
                     }
                 }
             } break;
-            case 2:
+            case 3:
                 // ESPTouch配网
                 hal.WiFiConfigSmartConfig();
                 break;
-            case 3:
+            case 4:
                 // 启动HTTP服务器
                 toApp = "webserver";
                 hasToApp = true;
                 end = true;
                 break;
-            case 4:
+            case 5:
                 // ESPNow设备扫描
                 break;
-            case 5:
+            case 6:
                 // 蓝牙扫描
                 break;
-            case 6:
+            case 7:
                 // 退出Bilibili账号
                 if (LittleFS.exists("/blCookies.txt")) {
                     LittleFS.remove("/blCookies.txt");
@@ -727,15 +743,20 @@ void AppSettings::cheak_config(char *a) {
         config[PARAM_SSID] = a;
         hal.saveConfig();
     }
-    if(GUI::msgbox_yn("立即输入密码？",a,"是","否"))
-    {
+    if (GUI::msgbox_yn("立即输入密码？", a, "是", "否")) {
         char pass[256];
         sprintf(pass, "%s", GUI::englishInput("输入密码"));
         config[PARAM_PASS] = pass;
         config[PARAM_CLOCKONLY] = "1";
-        hal.saveConfig();
-        GUI::msgbox("提示", "已写入配置，即将重启！");
-        esp_restart();
+        // 先确认是否能连上
+        if (hal.tryConnectWiFi() == -1) {
+            GUI::msgbox("连接失败", "请检查密码是否正确");
+            return;
+        } else {
+            hal.saveConfig();
+            GUI::msgbox("提示", "已写入配置，即将重启！");
+            esp_restart();
+        }
     } else {
         if (GUI::msgbox_yn("提示", "是否启动网页服务器配置密码", "确定",
                            "取消")) {

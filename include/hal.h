@@ -15,6 +15,7 @@ public:
     void WiFiConfigManual();
     void ReqWiFiConfig();
     void wait_input();
+    int tryConnectWiFi();
     /**
      * @brief 初始化
      * @return true 需要全屏刷新

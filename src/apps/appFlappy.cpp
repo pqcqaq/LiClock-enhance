@@ -57,7 +57,7 @@ public:
             display.fillCircle(10, bird_y, 3, GxEPD_BLACK);
             display.display(true);
 
-            delay(70);
+            delay(10);
         }
 
         appManager.goBack();

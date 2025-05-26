@@ -815,6 +815,38 @@ void HAL::autoConnectWiFi()
     sntp_stop();
 }
 
+int HAL::tryConnectWiFi()
+{
+    ESP_LOGI("hal", "tryConnectWiFi\n");
+    cheak_freq();
+    if (WiFi.isConnected())
+    {
+        return 0;
+    }
+    if (config[PARAM_SSID] == "")
+    {
+        GUI::info_msgbox("提示", "请先配置WiFi");
+        return -1;
+    }
+    GUI::info_msgbox("提示", "正在连接WiFi");
+    WiFi.setHostname("weatherclock");
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(config[PARAM_SSID].as<const char *>(), config[PARAM_PASS].as<const char *>());
+    if (!WiFi.isConnected())
+    {
+        if (WiFi.waitForConnectResult(20000) != WL_CONNECTED)
+        {
+            return -1;
+        }
+    }
+    F_LOG("成功连接:%s", WiFi.SSID().c_str());
+    F_LOG("IP:%s", WiFi.localIP().toString().c_str());
+    F_LOG("MAC:%s", WiFi.macAddress().c_str());
+    F_LOG("信号强度:%d", WiFi.RSSI());
+    // sntp_stop();
+    return 0;
+}
+
 void HAL::searchWiFi()
 {
     ESP_LOGI("hal", "searchWiFi");

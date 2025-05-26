@@ -87,7 +87,9 @@ const image_desc images[] = {
     {webserver_bits, webserver_width, webserver_height},
     {wenjian_bits, wenjian_width, wenjian_height},
     {wifiIcon_bits, wifiIcon_width, wifiIcon_height},
+    {wifi_connected_bits, wifi_connected_width, wifi_connected_height},
+    {wifi_disconnected_bits, wifi_disconnected_width, wifi_disconnected_height},
     {wifi_manual_bits, wifi_manual_width, wifi_manual_height},
     {wind_bits, wind_width, wind_height},
 };
-const uint16_t images_count = 60;
+const uint16_t images_count = 62;
