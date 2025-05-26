@@ -20,15 +20,11 @@ static const menu_item settings_menu_time[] = {
     {NULL, NULL},
 };
 static menu_item settings_menu_network[] = {
-    {NULL, "返回上一级"},
-    {NULL, "当前连接"},
-    {NULL, "搜索周围的WIFI"},
-    {NULL, "ESPTouch配网"},
-    {NULL, "启动HTTP服务器"},
-    {NULL, "ESPNow设备扫描"},
-    {NULL, "蓝牙扫描"},
-    {NULL, "退出Bilibili账号"},
-    {NULL, NULL},
+    {NULL, "返回上一级"},         {NULL, "当前连接"},
+    {NULL, "搜索周围的WIFI"},     {NULL, "ESPTouch配网"},
+    {NULL, "启动HTTP服务器"},     {NULL, "ESPNow设备扫描"},
+    {NULL, "蓝牙扫描"},           {NULL, "退出Bilibili账号"},
+    {NULL, "从文件加载WIFI配置"}, {NULL, NULL},
 };
 
 static const menu_item settings_menu_peripheral[] = {
@@ -372,8 +368,7 @@ void AppSettings::menu_network() {
         // 如果wifi连接则显示：当前：SSID，否则显示“未连接
         current_connection.icon = NULL;
         if (WiFi.status() == WL_CONNECTED) {
-            current_connection.title =
-                (String("当前连接：") + WiFi.SSID()).c_str();
+            current_connection.title = (String("当前：") + WiFi.SSID()).c_str();
         } else {
             current_connection.title = "未连接";
         }
@@ -454,6 +449,38 @@ void AppSettings::menu_network() {
                     break;
                 }
                 break;
+            case 8:
+                char configFileName[256];
+                // 从文件加载配置
+                strcpy(configFileName, GUI::fileDialog("请选择WIFI配置文件",
+                                                       false, "wificonfig"));
+                if (configFileName == NULL) {
+                    GUI::msgbox("提示", "没有选择文件");
+                    break;
+                } else {
+                    HAL::FilePair f = hal.fileOpen(configFileName);
+                    // 第一行是SSID，第二行是密码
+                    if (f.file) {
+                        String ssid = f.file.readStringUntil('\n');
+                        String password = f.file.readStringUntil('\n');
+                        f.file.close();
+                        config[PARAM_PASS] = password.c_str();
+                        config[PARAM_SSID] = ssid.c_str();
+                        // 尝试连接Wifi
+                        int result = hal.tryConnectWiFi();
+                        if (result == 0) {
+                            GUI::msgbox("连接成功", (String("已连接到") + ssid +
+                                                     "\n请重启设备以使设置生效")
+                                                        .c_str());
+                            ESP.restart();
+                        } else if (result == -1) {
+                            GUI::msgbox("连接失败", "密码错误或SSID不存在");
+                        }
+
+                    } else {
+                        GUI::msgbox("错误", "无法打开文件");
+                    }
+                }
             default:
                 break;
         }

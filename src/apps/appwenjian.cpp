@@ -80,12 +80,8 @@ private:
     }
     void openbin(){
         File file;
-        if (strncmp(filename, "/sd/", 4) == 0) {
-            file = SD.open(remove_path_prefix(filename,"/sd"));
-        } 
-        else if (strncmp(filename, "/littlefs/", 10) == 0) {
-            file = LittleFS.open(remove_path_prefix(filename,"/littlefs"));
-        }
+        auto f = hal.fileOpen(filename);
+        file = f.file;
         int currentPage = 0;
         int totalPages = 0;
         file.seek(0, SeekEnd);
@@ -176,7 +172,6 @@ public:
    // void loadwenjian(const String path);
     const char* getFileName(const char* filePath);
     const char* combinePath(const char* directory, const char* fileName);
-    const char* remove_path_prefix(const char* path, const char* prefix);
     const char* getDirectoryPath(const char* filePath);
     void setup();
     const char* get_houzhui(const char* filename);
@@ -201,10 +196,8 @@ int Appwenjian::getFileSize(const char* filePath, bool fromTF)
     File file;
     int fileSize = 0;
     
-    if (fromTF == false)
-        file = LittleFS.open(remove_path_prefix(filePath,"/littlefs"));
-    else
-        file = SD.open(remove_path_prefix(filePath,"/sd"));
+    auto f = hal.fileOpen(filePath);
+    file = f.file;
     
     if (!file)
     {
@@ -538,19 +531,6 @@ const char* Appwenjian::combinePath(const char* directory, const char* fileName)
 
   // 返回完整路径
   return fullPath;
-}
-
-const char* Appwenjian::remove_path_prefix(const char* path, const char* prefix) {
-    size_t prefix_len = strlen(prefix);
-    size_t path_len = strlen(path);
-
-    // 检查路径是否以指定前缀开头
-    if (strncmp(path, prefix, prefix_len) == 0) {
-        // 返回去除前缀后的路径
-        return path + prefix_len;
-    }
-    // 如果路径不以指定前缀开头，则返回原始路径
-    return path;
 }
 
 const char* Appwenjian::getDirectoryPath(const char* filePath) {

@@ -440,18 +440,7 @@ bool AppEBook::indexcode_1(){
     }
     return true;
 }
-const char* remove_path_prefix(const char* path, const char* prefix) {
-    size_t prefix_len = strlen(prefix);
-    size_t path_len = strlen(path);
 
-    // 检查路径是否以指定前缀开头
-    if (strncmp(path, prefix, prefix_len) == 0) {
-        // 返回去除前缀后的路径
-        return path + prefix_len;
-    }
-    // 如果路径不以指定前缀开头，则返回原始路径
-    return path;
-}
 int8_t getCharLength(char zf) //获取ascii字符的长度
 {
   if (zf == 0x20) return 4;      //空格

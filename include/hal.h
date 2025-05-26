@@ -2,14 +2,21 @@
 #define __HAL_H__
 #include <A_Config.h>
 #include <Preferences.h>
+
 #include "OneButton.h"
-class HAL
-{
-public:
+
+const char *remove_path_prefix(const char *path, const char *prefix);
+class HAL {
+   public:
+    struct FilePair {
+        File file;
+        bool file_fs_sd;
+    };
+    FilePair fileOpen(const char *currentFilename);
     void saveConfig();
     void loadConfig();
     void getTime();
-    char* get_char_sha_key(const char *str);
+    char *get_char_sha_key(const char *str);
     void cheak_firmware_update();
     void WiFiConfigSmartConfig();
     void WiFiConfigManual();
@@ -39,8 +46,9 @@ public:
     time_t lastsync = 1;
     int32_t every = 100;
     int32_t delta = 0;
-    int32_t upint = 2 * 60;                 // NTP同步间隔
-    int32_t last_update_delta = 0x7FFFFFFF; // 上次更新时修正时间与实际时间的差值
+    int32_t upint = 2 * 60;  // NTP同步间隔
+    int32_t last_update_delta =
+        0x7FFFFFFF;  // 上次更新时修正时间与实际时间的差值
     Preferences pref;
     int16_t VCC = 0;
     bool btn_activelow = true;
@@ -54,28 +62,23 @@ public:
     OneButton btnr = OneButton(PIN_BUTTONR);
     OneButton btnl = OneButton(PIN_BUTTONL);
     OneButton btnc = OneButton(PIN_BUTTONC);
-    void hookButton()
-    {
+    void hookButton() {
         _hookButton = true;
-        while (btnr.isPressing() || btnl.isPressing() || btnc.isPressing())
-        {
+        while (btnr.isPressing() || btnl.isPressing() || btnc.isPressing()) {
             delay(10);
         }
         delay(10);
         Serial.println("Hooked");
     }
-    void unhookButton()
-    {
-        while (btnr.isPressing() || btnl.isPressing() || btnc.isPressing())
-        {
+    void unhookButton() {
+        while (btnr.isPressing() || btnl.isPressing() || btnc.isPressing()) {
             delay(10);
         }
         delay(10);
         _hookButton = false;
         Serial.println("Unhooked");
     }
-    void detachAllButtonEvents()
-    {
+    void detachAllButtonEvents() {
         btnr.attachClick(NULL);
         btnr.attachDoubleClick(NULL);
         btnr.attachLongPressStart(NULL);
@@ -88,7 +91,7 @@ public:
         btnr.attachDuringLongPress(NULL, NULL);
         btnr.attachLongPressStop(NULL, NULL);
         btnr.attachMultiClick(NULL, NULL);
-        
+
         btnl.attachClick(NULL);
         btnl.attachDoubleClick(NULL);
         btnl.attachDuringLongPress(NULL);
@@ -116,12 +119,12 @@ public:
     }
     bool noDeepSleep = false;
     bool SleepUpdateMutex = false;
-    bool _hookButton = false; // 不要修改这个
+    bool _hookButton = false;  // 不要修改这个
     bool wakeUpFromDeepSleep = false;
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     int _wakeupIO[2] = {PIN_BUTTONC, PIN_BUTTONL};
 
-private:
+   private:
 };
 extern HAL hal;
 #endif
