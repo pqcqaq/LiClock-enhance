@@ -1,5 +1,6 @@
 #include "AppManager.h"
 #include "images/images.h"
+#include <utils/List.h>
 
 class AppInstaller : public AppBase
 {
@@ -16,7 +17,7 @@ public:
         _showInList = true;
     }
     void set();
-    std::list<String> appNames;
+    List<String> appNames;
     int getAppSize(const String path, bool fromTF = false);
     void getLocalApp();
     void loadApp(const String path);
@@ -36,7 +37,7 @@ void AppInstaller::set(){
 }
 int AppInstaller::getAppSize(const String path, bool fromTF)
 {
-    std::list<String> filenames;
+    List<String> filenames;
     File root, file;
     int totalSize = 0;
     filenames.push_back(path);
@@ -110,7 +111,7 @@ void AppInstaller::loadApp(const String path) // 加载TF卡App
 }
 bool AppInstaller::install(const String path)
 {
-    std::list<String> filenames;
+    List<String> filenames;
     File root, file;
     filenames.push_back(path);
     while (filenames.empty() == false)
@@ -258,7 +259,7 @@ void AppInstaller::menu_local()
         appList[0].title = "返回";
         appList[0].icon = NULL;
         int i = 1;
-        std::list<String>::iterator it;
+        List<String>::iterator it;
         for (it = appNames.begin(); it != appNames.end(); ++it)
         {
             appList[i].title = (*it).c_str();

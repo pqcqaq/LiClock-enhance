@@ -12,6 +12,7 @@
 #include "favicon.h"
 #include "blockly.h"
 #include "jss3.h"
+#include <utils/List.h>
 ////////////////////////////下面是lua部分//////////////////////////
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -111,7 +112,7 @@ void mkdirHandler(AsyncWebServerRequest *request)
 }
 bool myxcopy(const String path, const String newpath)
 {
-    std::list<String> filenames;
+    List<String> filenames;
     File root, file;
     filenames.push_back(path);
     String tmp;

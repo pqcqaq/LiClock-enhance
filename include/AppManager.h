@@ -11,6 +11,7 @@ public:
     const char *title = "BaseApp";                // 一个标题，显示在App列表中
     const char *description = "BaseApp";          // App描述
     const uint8_t *image = NULL;                  // App图像，32*32,xbm格式
+    const uint8_t order = 0;                      // App在列表中的顺序，数字越小越靠前
     int appID = 0;                                // AppID，唯一标识App
     bool _showInList = true;                      // 是否展示在App列表
     int wakeupIO[2] = {PIN_BUTTONC, PIN_BUTTONL}; // 唤醒IO

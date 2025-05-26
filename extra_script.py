@@ -4,8 +4,6 @@ from SCons.Script import Import
 Import("env")
 
 print("\n>>> Running extra_script.py")
-env.Execute("$PYTHONEXE -m pip list")
-env.Execute("$PYTHONEXE -m pip install pillow")
 
 # Install missed package
 try:
