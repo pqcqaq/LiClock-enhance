@@ -473,7 +473,7 @@ void HAL::ReqWiFiConfig()
     // u8g2Fonts.print("向右:SmartConfig");
     // u8g2Fonts.setCursor(0, 80);
     // u8g2Fonts.print("中间:离线模式");
-    display.drawXBitmap(0, 0, no_wifi_connected_bits, no_wifi_connected_bits_width, no_wifi_connected_bits_height, 0);
+    display.drawXBitmap(0, 0, no_wifi_connected_bits, no_wifi_connected_width, no_wifi_connected_height, 0);
     display.display();
     uint32_t last_millis = millis();
     int a = 0;
@@ -913,7 +913,7 @@ void HAL::powerOff(bool displayMessage)
         display.fillScreen(GxEPD_WHITE);
         // u8g2Fonts.setCursor(120, 70);
         // u8g2Fonts.print("已关机");
-        display.drawXBitmap(0, 0, poweroff_bits, poweroff_bits_width, poweroff_bits_height, 0);
+        display.drawXBitmap(0, 0, poweroff_bits, poweroff_width, poweroff_height, 0);
         display.display();
     }
     force_full_update = true;

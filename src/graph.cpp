@@ -1,6 +1,6 @@
 #include <A_Config.h>
 
-#include "images/images.h"
+#include "images/graph.h"
 
 float rain_data_raw[SAMPLE_COUNT];
 int ydata[SCREEN_WIDTH + PX_PER_SAMPLE];
@@ -36,25 +36,25 @@ void processRain(float max = 300.0) {
 
 // 下面是天气图标部分
 const image_desc weather_icons_day[] = {
-    {sun_bits, sun_bits_width, sun_bits_height},
-    {moon_bits, moon_bits_width, moon_bits_height},
-    {cloud_sun_bits, cloud_sun_bits_width, cloud_sun_bits_height},
-    {cloud_moon_bits, cloud_moon_bits_width, cloud_moon_bits_height},
-    {cloud_bits, cloud_bits_width, cloud_bits_height},
-    {cloud_bits, cloud_bits_width, cloud_bits_height},
-    {fog_bits, fog_bits_width, fog_bits_height},
-    {fog_bits, fog_bits_width, fog_bits_height},
-    {cloud_rain_bits, cloud_rain_bits_width, cloud_rain_bits_height},
-    {cloud_rain_bits, cloud_rain_bits_width, cloud_rain_bits_height},
-    {cloud_showers_bits, cloud_showers_bits_width, cloud_showers_bits_height},
-    {cloud_showers_bits, cloud_showers_bits_width, cloud_showers_bits_height},
-    {fog_bits, fog_bits_width, fog_bits_height},
-    {snowflake_bits, snowflake_bits_width, snowflake_bits_height},
-    {snowflake_bits, snowflake_bits_width, snowflake_bits_height},
-    {snowflake_bits, snowflake_bits_width, snowflake_bits_height},
-    {snowflake_bits, snowflake_bits_width, snowflake_bits_height},
-    {sun_dust_bits, sun_dust_bits_width, sun_dust_bits_height},
-    {sun_dust_bits, sun_dust_bits_width, sun_dust_bits_height},
-    {wind_bits, wind_bits_width, wind_bits_height},
-    //{thunderstorm_bits, thunderstorm_bits_width, thunderstorm_bits_height},
+    {sun_bits, sun_width, sun_height},
+    {moon_bits, moon_width, moon_height},
+    {cloud_sun_bits, cloud_sun_width, cloud_sun_height},
+    {cloud_moon_bits, cloud_moon_width, cloud_moon_height},
+    {cloud_bits, cloud_width, cloud_height},
+    {cloud_bits, cloud_width, cloud_height},
+    {fog_bits, fog_width, fog_height},
+    {fog_bits, fog_width, fog_height},
+    {cloud_rain_bits, cloud_rain_width, cloud_rain_height},
+    {cloud_rain_bits, cloud_rain_width, cloud_rain_height},
+    {cloud_showers_bits, cloud_showers_width, cloud_showers_height},
+    {cloud_showers_bits, cloud_showers_width, cloud_showers_height},
+    {fog_bits, fog_width, fog_height},
+    {snowflake_bits, snowflake_width, snowflake_height},
+    {snowflake_bits, snowflake_width, snowflake_height},
+    {snowflake_bits, snowflake_width, snowflake_height},
+    {snowflake_bits, snowflake_width, snowflake_height},
+    {sun_dust_bits, sun_dust_width, sun_dust_height},
+    {sun_dust_bits, sun_dust_width, sun_dust_height},
+    {wind_bits, wind_width, wind_height},
+    //{thunderstorm_bits, thunderstorm_width, thunderstorm_height},
 };

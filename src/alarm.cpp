@@ -1,7 +1,7 @@
 #include <A_Config.h>
 #include <alarm.h>
 #include <LittleFS.h>
-#include "images/images.h"
+#include "images/alarm.h"
 
 Alarm alarms;
 
@@ -74,7 +74,7 @@ void Alarm::alarm()
         buzzer.playFile(filename.c_str());
     }
     display.clearScreen();
-    display.drawXBitmap(88, 4, alarm_clock_bits, alarm_clock_bits_width, alarm_clock_bits_height, 0);
+    display.drawXBitmap(88, 4, alarm_clock_bits, alarm_clock_width, alarm_clock_height, 0);
     display.display();
     for (int16_t i = 0; i < 600; ++i)
     {

@@ -1,5 +1,6 @@
 #include "AppManager.h"
 #include "images/images.h"
+#include <utils/List.h>
 
 //#define wprintf(fmt, ...) printf("[%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 #define LOG(fmt, ...) \
@@ -170,7 +171,7 @@ public:
         _showInList = true;
     }
     void set();
-    std::list<String> directorylist;
+    List<String> directorylist;
     int getFileSize(const char *filepath, bool fromTF = false);
    // void loadwenjian(const String path);
     const char* getFileName(const char* filePath);
@@ -795,7 +796,7 @@ void Appwenjian::selctwenjianjia(bool _file)
     fileList[1].title = "根目录";
     fileList[1].icon = NULL;
     int i = 2;
-    std::list<String>::iterator it;
+    List<String>::iterator it;
     for (it = directorylist.begin(); it != directorylist.end(); ++it)
     {
         fileList[i].title = (*it).c_str();
