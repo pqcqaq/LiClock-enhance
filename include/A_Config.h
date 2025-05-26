@@ -19,6 +19,9 @@
 #include <LittleFS.h>
 #include "images/images.h"
 
+// pre-build-auto-generated: timestamp
+#define built_at "2025-05-25 23:09:46"
+// pre-build-auto-generated: version
 #define code_version "2.0.11"
 
 #define SCREEN_WIDTH 296
