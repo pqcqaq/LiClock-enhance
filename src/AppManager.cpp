@@ -165,12 +165,12 @@ void AppManager::showAppList(int page)
         // WiFi
         if (WiFi.isConnected())
         {
-            display.drawXBitmap(x - 16, 2, wifiIcon_bits, wifiIcon_bits_width, wifiIcon_bits_height, 0);
+            display.drawXBitmap(x - 16, 2, wifiIcon_bits, wifiIcon_width, wifiIcon_height, 0);
             x -= 16 - 2;
         }
     }
     // 返回按钮
-    display.drawXBitmap(12, 21, goBackIcon_bits, goBackIcon_bits_width, goBackIcon_bits_height, 0);
+    display.drawXBitmap(12, 21, goBackIcon_bits, goBackIcon_width, goBackIcon_height, 0);
     u8g2Fonts.drawUTF8(16, 65, "返回");
     int pagebase = 11 * page; // 页基数（这一页第一个）
     int pageItemsCount;
@@ -191,11 +191,11 @@ void AppManager::showAppList(int page)
         y = ((i + 1) % 2) * 52 + 21; // App左上角位置
         if (realAppList[pagebase + i]->image != NULL)
         {
-            display.drawXBitmap(x + 8, y, realAppList[pagebase + i]->image, defaultAppIcon_bits_width, defaultAppIcon_bits_height, 0);
+            display.drawXBitmap(x + 8, y, realAppList[pagebase + i]->image, defaultAppIcon_width, defaultAppIcon_height, 0);
         }
         else
         {
-            display.drawXBitmap(x + 8, y, defaultAppIcon_bits, defaultAppIcon_bits_width, defaultAppIcon_bits_height, 0);
+            display.drawXBitmap(x + 8, y, defaultAppIcon_bits, defaultAppIcon_width, defaultAppIcon_height, 0);
         }
         int w = u8g2Fonts.getUTF8Width(realAppList[pagebase + i]->title);
         int x_font_offset = 0;
@@ -391,7 +391,7 @@ AppBase *AppManager::appSelector(bool showHidden)
         // display.setCursor(60, 72);
         // display.setFont(&FreeSans18pt7b);
         // display.print("Loading...");
-        display.drawXBitmap(0, 0, loading_bits, loading_bits_width, loading_bits_height, 0);
+        display.drawXBitmap(0, 0, loading_bits, loading_width, loading_height, 0);
         display.display(true);
         display.swapBuffer(0);
     }
