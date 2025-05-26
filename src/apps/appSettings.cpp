@@ -787,10 +787,10 @@ void AppSettings::cheak_config(char *a)
         config[PARAM_SSID] = a;
         hal.saveConfig();
     }
-    if(GUI::msgbox_yn("密码是否仅有数字",a,"是","否"))
+    if(GUI::msgbox_yn("立即输入密码？",a,"是","否"))
     {
-        char pass[32];
-        sprintf(pass, "%d", GUI::msgbox_number("输入密码",8,0));
+        char pass[256];
+        sprintf(pass, "%s", GUI::englishInput("输入密码"));
         config[PARAM_PASS] = pass;
         config[PARAM_CLOCKONLY] = "1";
         hal.saveConfig();

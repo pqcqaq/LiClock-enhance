@@ -327,7 +327,7 @@ void HAL::WiFiConfigSmartConfig()
 {
     ESP_LOGI("hal", "WiFiConfigManual\n");
     cheak_freq();
-#include "img_esptouch.h"
+#include "images/esptouch.h"
     display.fillScreen(GxEPD_WHITE);
     display.drawXBitmap(0, 0, esptouch_bits, 296, 128, GxEPD_BLACK);
     display.display();
@@ -369,7 +369,7 @@ void HAL::WiFiConfigManual()
     ESP_LOGI("hal", "WiFiConfigManual");
     cheak_freq();
     DNSServer dnsServer;
-#include "img_manual.h"
+#include "images/manual.h"
     String passwd = String((esp_random() % 1000000000L) + 10000000L); // 生成随机密码
     String str = "WIFI:T:WPA2;S:WeatherClock;P:" + passwd + ";;";
     WiFi.softAP("WeatherClock", passwd.c_str());
@@ -979,7 +979,7 @@ int HAL::getNTPMinute()
     int val = pref.getUChar(SETTINGS_PARAM_NTP_INTERVAL, 1);
     return res[val];
 }
-#include "img_goodnightmorning.h"
+#include "images/goodnightmorning.h"
 uint8_t RTC_DATA_ATTR night_sleep_today = -1; // 用于判断今天是否退出过夜间模式
 uint8_t RTC_DATA_ATTR night_sleep = 0;
 void HAL::checkNightSleep()

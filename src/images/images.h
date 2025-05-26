@@ -21,11 +21,15 @@
 #include "appwenjian.h"
 #include "battery.h"
 #include "daily.h"
+#include "dpp.h"
+#include "esptouch.h"
 #include "filemanager.h"
 #include "flappy.h"
+#include "goodnightmorning.h"
 #include "graph.h"
 #include "gui.h"
 #include "gui_info.h"
+#include "manual.h"
 
 extern const image_desc alarm_images[];
 #define ALARM_IMAGE_COUNT 1
@@ -78,11 +82,20 @@ extern const image_desc battery_images[];
 extern const image_desc daily_images[];
 #define DAILY_IMAGE_COUNT 4
 
+extern const image_desc dpp_images[];
+#define DPP_IMAGE_COUNT 1
+
+extern const image_desc esptouch_images[];
+#define ESPTOUCH_IMAGE_COUNT 1
+
 extern const image_desc filemanager_images[];
 #define FILEMANAGER_IMAGE_COUNT 7
 
 extern const image_desc flappy_images[];
 #define FLAPPY_IMAGE_COUNT 1
+
+extern const image_desc goodnightmorning_images[];
+#define GOODNIGHTMORNING_IMAGE_COUNT 2
 
 extern const image_desc graph_images[];
 #define GRAPH_IMAGE_COUNT 12
@@ -93,8 +106,11 @@ extern const image_desc gui_images[];
 extern const image_desc gui_info_images[];
 #define GUI_INFO_IMAGE_COUNT 3
 
+extern const image_desc manual_images[];
+#define MANUAL_IMAGE_COUNT 1
+
 extern const image_desc images[];
 extern const uint16_t images_count;
-#define IMAGE_COUNT 55
+#define IMAGE_COUNT 60
 
 #endif // IMAGES_H

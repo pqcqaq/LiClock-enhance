@@ -17,15 +17,20 @@
 #include "appwenjian.h"
 #include "battery.h"
 #include "daily.h"
+#include "dpp.h"
+#include "esptouch.h"
 #include "filemanager.h"
 #include "flappy.h"
+#include "goodnightmorning.h"
 #include "graph.h"
 #include "gui.h"
 #include "gui_info.h"
+#include "manual.h"
 
 
 const image_desc images[] = {
     {APP_installer_bits, APP_installer_width, APP_installer_height},
+    {DPP_bits, DPP_width, DPP_height},
     {OOBE_BG_bits, OOBE_BG_width, OOBE_BG_height},
     {OOBE_Start_bits, OOBE_Start_width, OOBE_Start_height},
     {OOBE_checkWiring_bits, OOBE_checkWiring_width, OOBE_checkWiring_height},
@@ -46,6 +51,7 @@ const image_desc images[] = {
     {debug_bits, debug_width, debug_height},
     {defaultAppIcon_bits, defaultAppIcon_width, defaultAppIcon_height},
     {ebook_bits, ebook_width, ebook_height},
+    {esptouch_bits, esptouch_width, esptouch_height},
     {flappy_bits, flappy_width, flappy_height},
     {fog_bits, fog_width, fog_height},
     {folder_bits, folder_width, folder_height},
@@ -54,6 +60,8 @@ const image_desc images[] = {
     {frame_today_bits, frame_today_width, frame_today_height},
     {frame_tomorrow_bits, frame_tomorrow_width, frame_tomorrow_height},
     {goBackIcon_bits, goBackIcon_width, goBackIcon_height},
+    {goodmorning_bits, goodmorning_width, goodmorning_height},
+    {goodnight_bits, goodnight_width, goodnight_height},
     {imgfile_bits, imgfile_width, imgfile_height},
     {loading_bits, loading_width, loading_height},
     {luafile_bits, luafile_width, luafile_height},
@@ -79,6 +87,7 @@ const image_desc images[] = {
     {webserver_bits, webserver_width, webserver_height},
     {wenjian_bits, wenjian_width, wenjian_height},
     {wifiIcon_bits, wifiIcon_width, wifiIcon_height},
+    {wifi_manual_bits, wifi_manual_width, wifi_manual_height},
     {wind_bits, wind_width, wind_height},
 };
-const uint16_t images_count = 55;
+const uint16_t images_count = 60;

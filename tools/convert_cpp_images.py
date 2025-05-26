@@ -50,7 +50,7 @@ def cpp_to_bmp(folder):
             var_name = match.group(4)  # 变量名
             var_start = match.end(0)  # 变量声明结束位置（初始化大括号开始）
 
-            var_block = extract_variable_block(content, var_start)
+            var_block = extract_variable_block(content, var_start - 1)
 
             if not var_block:
                 continue
@@ -100,7 +100,7 @@ def cpp_to_bmp(folder):
             print(f" - 文件: {path} 中变量名: {name}")
 
 if __name__ == "__main__":
-    target_dir = Path("src")
+    target_dir = Path("./")
     if not os.path.isdir(target_dir):
         print("无效目录！")
     else:

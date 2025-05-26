@@ -43,7 +43,7 @@ static EventGroupHandle_t s_dpp_event_group;
 
 void drawDPPQRCode(const char *str)
 {
-#include "img_dpp.h"
+#include "images/dpp.h"
     display.clearScreen();
     display.drawXBitmap(0, 0, DPP_bits, 296, 128, GxEPD_BLACK);
     QRCode qrcode;
