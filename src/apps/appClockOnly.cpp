@@ -55,9 +55,7 @@ void AppClockOnly::setup() {
 
             xSemaphoreGive(peripherals.i2cMutex);
 
-            u8g2Fonts.printf("温度:%.1f℃", temperature);
-            u8g2Fonts.setCursor(0, u8g2Fonts.getCursorY() + 12);
-            u8g2Fonts.printf("气压:%.1f hPa", pressure);
+            u8g2Fonts.printf("温度:%.1f℃  气压:%.1f hPa", temperature, pressure);
         }
     }
 
