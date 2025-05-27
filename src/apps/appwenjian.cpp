@@ -80,7 +80,7 @@ private:
     }
     void openbin(){
         File file;
-        auto f = hal.fileOpen(filename);
+        auto f = hal.fileOpen(filename, "r");
         file = f.file;
         int currentPage = 0;
         int totalPages = 0;
@@ -196,7 +196,7 @@ int Appwenjian::getFileSize(const char* filePath, bool fromTF)
     File file;
     int fileSize = 0;
     
-    auto f = hal.fileOpen(filePath);
+    auto f = hal.fileOpen(filePath, "r");
     file = f.file;
     
     if (!file)

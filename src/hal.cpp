@@ -1139,25 +1139,62 @@ const char *remove_path_prefix(const char *path, const char *prefix) {
     return path;
 }
 
-HAL::FilePair HAL::fileOpen(const char* currentFilename) {
+bool HAL::fileExists(const char* path) {
+    if (strncmp(path, "/littlefs/", 10) == 0) {
+        const char* relativePath = path + 9;  // 去掉 "/littlefs"
+        return LittleFS.exists(relativePath);
+    } else if (strncmp(path, "/sd/", 4) == 0) {
+        const char* relativePath = path + 3;  // 去掉 "/sd"
+        return SD.exists(relativePath);
+    }
+    return false;  // 非法路径前缀
+}
+
+
+HAL::FilePair HAL::fileOpen(const char* currentFilename, const char* mode) {
     HAL::FilePair result;
     result.file_fs_sd = false;  // 默认使用 LittleFS
 
     const char* relativePath = nullptr;
-    char indexesName[256] = {0};
 
+    // 判断是 LittleFS 还是 SD
     if (strncmp(currentFilename, "/littlefs/", 10) == 0) {
         result.file_fs_sd = false;
         relativePath = remove_path_prefix(currentFilename, "/littlefs");
-        result.file = LittleFS.open(relativePath);
     } else if (strncmp(currentFilename, "/sd/", 4) == 0) {
         result.file_fs_sd = true;
         relativePath = remove_path_prefix(currentFilename, "/sd");
-        result.file = SD.open(relativePath);
+    } else {
+        result.file = File();  // 返回一个无效文件
+        return result;
+    }
+
+    // 映射模式
+    if (strcmp(mode, "r") == 0) {
+        result.file = result.file_fs_sd ? SD.open(relativePath, FILE_READ)
+                                        : LittleFS.open(relativePath, FILE_READ);
+    } else if (strcmp(mode, "w") == 0) {
+        result.file = result.file_fs_sd ? SD.open(relativePath, FILE_WRITE)
+                                        : LittleFS.open(relativePath, FILE_WRITE);
+    } else if (strcmp(mode, "a") == 0) {
+        // 附加模式：手动实现（对于 FS 类型不统一支持 append）
+        if (result.file_fs_sd) {
+            result.file = SD.open(relativePath, FILE_WRITE);
+        } else {
+            result.file = LittleFS.open(relativePath, FILE_WRITE);
+        }
+        if (result.file) {
+            result.file.seek(result.file.size());  // 移动到末尾
+        }
+    } else {
+        // 默认只读
+        result.file = result.file_fs_sd ? SD.open(relativePath, FILE_READ)
+                                        : LittleFS.open(relativePath, FILE_READ);
     }
 
     return result;
 }
+
 
 void HAL::rm_rf(const char *path) {
     DIR *dp;

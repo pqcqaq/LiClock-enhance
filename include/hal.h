@@ -12,7 +12,8 @@ class HAL {
         File file;
         bool file_fs_sd;
     };
-    FilePair fileOpen(const char *currentFilename);
+    bool fileExists(const char *path);
+    FilePair fileOpen(const char *currentFilename, const char *mode);
     void saveConfig();
     void loadConfig();
     void getTime();

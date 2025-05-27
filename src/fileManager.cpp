@@ -1,5 +1,6 @@
 #include <A_Config.h>
 #include <GUI.h>
+
 #include "images/images.h"
 
 struct s_fileicondict {
@@ -185,4 +186,122 @@ const char *fileDialog(const char *title, bool isApp, const char *endsWidth,
     }
     return filedialog_buffer;
 }
+
+const char *folderDialog(const char *title) {
+    static char selected_path[256];
+    String cwd = "/";
+    bool useSD = false;
+
+    // 选择文件系统
+    if (peripherals.isSDLoaded()) {
+        if (msgbox_yn("请选择文件系统", "左：LittleFS\n右：TF 卡", "TF 卡",
+                      "LittleFS")) {
+            useSD = true;
+        }
+    }
+
+    // 状态结构体
+    struct ButtonStates {
+        bool btnr_short = false;
+        bool btnr_long = false;
+        bool btnl_short = false;
+        bool btnl_long = false;
+        bool btnc_short = false;
+        bool btnc_long = false;
+    } states;
+
+    // 回调函数
+    auto onBtnrClick = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnr_short = true;
+    };
+    auto onBtnrLong = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnr_long = true;
+    };
+    auto onBtnlClick = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnl_short = true;
+    };
+    auto onBtnlLong = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnl_long = true;
+    };
+    auto onBtncClick = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnc_short = true;
+    };
+    auto onBtncLong = [](void *ptr) {
+        static_cast<ButtonStates *>(ptr)->btnc_long = true;
+    };
+
+    // 初始化按钮状态
+    hal.hookButton();
+    hal.btnr.attachClick(onBtnrClick, &states);
+    hal.btnr.attachLongPressStart(onBtnrLong, &states);
+    hal.btnl.attachClick(onBtnlClick, &states);
+    hal.btnl.attachLongPressStart(onBtnlLong, &states);
+    hal.btnc.attachClick(onBtncClick, &states);
+    hal.btnc.attachLongPressStart(onBtncLong, &states);
+
+    while (true) {
+        File root = useSD ? SD.open(cwd) : LittleFS.open(cwd);
+        if (!root) {
+            GUI::msgbox("错误", "无法打开目录");
+            return nullptr;
+        }
+
+        std::vector<String> folders;
+        while (true) {
+            File f = root.openNextFile();
+            if (!f) break;
+            if (f.isDirectory()) {
+                folders.push_back(f.name());
+            }
+            f.close();
+        }
+        root.close();
+
+        // 构建 menu_item 列表
+        std::vector<menu_item> items(folders.size() + 1);
+        items[0].title = "..";
+        items[0].icon = folder_bits;
+        for (size_t i = 0; i < folders.size(); ++i) {
+            items[i + 1].title = folders[i].c_str();
+            items[i + 1].icon = folder_bits;
+        }
+
+        int selected = GUI::menu(title, items.data());
+        if (selected < 0) return nullptr;
+
+        // 重置按钮状态
+        states.btnr_short = states.btnr_long = false;
+        states.btnl_short = states.btnl_long = false;
+        states.btnc_short = states.btnc_long = false;
+
+        // 等待按键操作
+        while (true) {
+            if (states.btnc_short) {
+                states.btnc_short = false;
+
+                if (selected == 0) {
+                    if (cwd != "/") {
+                        cwd = cwd.substring(0, cwd.lastIndexOf('/'));
+                        if (cwd == "") cwd = "/";
+                    }
+                } else {
+                    cwd += (cwd.endsWith("/") ? "" : "/");
+                    cwd += folders[selected - 1];
+                }
+                break;
+            }
+
+            if (states.btnc_long) {
+                states.btnc_long = false;
+                // 返回选择的路径
+                snprintf(selected_path, sizeof(selected_path), "%s%s",
+                         useSD ? "/sd" : "/littlefs", cwd.c_str());
+                return selected_path;
+            }
+
+            delay(20);  // 防抖
+        }
+    }
+}
+
 }  // namespace GUI

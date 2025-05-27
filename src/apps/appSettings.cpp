@@ -20,11 +20,17 @@ static const menu_item settings_menu_time[] = {
     {NULL, NULL},
 };
 static menu_item settings_menu_network[] = {
-    {NULL, "返回上一级"},         {NULL, "当前连接"},
-    {NULL, "搜索周围的WIFI"},     {NULL, "ESPTouch配网"},
-    {NULL, "启动HTTP服务器"},     {NULL, "ESPNow设备扫描"},
-    {NULL, "蓝牙扫描"},           {NULL, "退出Bilibili账号"},
-    {NULL, "从文件加载WIFI配置"}, {NULL, NULL},
+    {NULL, "返回上一级"},
+    {NULL, "当前连接"},
+    {NULL, "搜索周围的WIFI"},
+    {NULL, "ESPTouch配网"},
+    {NULL, "启动HTTP服务器"},
+    {NULL, "ESPNow设备扫描"},
+    {NULL, "蓝牙扫描"},
+    {NULL, "退出Bilibili账号"},
+    {NULL, "从文件加载WIFI配置"},
+    {NULL, "保存当前网络"},
+    {NULL, NULL},
 };
 
 static const menu_item settings_menu_peripheral[] = {
@@ -456,14 +462,19 @@ void AppSettings::menu_network() {
                                                        false, "wificonfig"));
                 if (configFileName == NULL) {
                     GUI::msgbox("提示", "没有选择文件");
+                    end = true;
                     break;
                 } else {
-                    HAL::FilePair f = hal.fileOpen(configFileName);
+                    HAL::FilePair f = hal.fileOpen(configFileName, "r");
                     // 第一行是SSID，第二行是密码
-                    if (f.file) {
+                    if (f.file.available()) {
                         String ssid = f.file.readStringUntil('\n');
                         String password = f.file.readStringUntil('\n');
                         f.file.close();
+                        // 先处理一下这两个字符串，trim
+                        ssid.trim();
+                        password.trim();
+                        // 检查是否有空格
                         config[PARAM_PASS] = password.c_str();
                         config[PARAM_SSID] = ssid.c_str();
                         // 尝试连接Wifi
@@ -479,8 +490,52 @@ void AppSettings::menu_network() {
 
                     } else {
                         GUI::msgbox("错误", "无法打开文件");
+                        Serial.printf("无法打开文件%s\n", configFileName);
                     }
                 }
+                end = true;
+                break;
+            case 9:
+                char toSavePath[256];
+                if (strlen(config[PARAM_SSID].as<const char *>()) == 0) {
+                    GUI::msgbox("错误", "当前没有WIFI配置");
+                    break;
+                }
+                // 保存当前网络
+                strcpy(toSavePath, GUI::fileDialog("选择保存目录"));
+                if (toSavePath == NULL) {
+                    GUI::msgbox("提示", "没有选择目录");
+                    end = true;
+                    break;
+                } else {
+                    strcat(toSavePath, "/");
+                    strcat(toSavePath, config[PARAM_SSID].as<const char *>());
+                    strcat(toSavePath, ".wificonfig");
+                    // 如果文件已经存在，则提示覆盖
+                    if (hal.fileExists(toSavePath)) {
+                        if (GUI::msgbox_yn("文件已存在",
+                                           "是否覆盖？") == false) {
+                            GUI::msgbox("提示", "已取消保存");
+                            end = true;
+                            break;
+                        }
+                    } else {
+                        // 如果文件不存在，则创建
+                        Serial.printf("正在保存到%s\n", toSavePath);
+                    }
+                    // 打开文件
+                    HAL::FilePair f = hal.fileOpen(toSavePath, "w");
+                    if (f.file.availableForWrite()) {
+                        f.file.println(config[PARAM_SSID].as<const char *>());
+                        f.file.println(config[PARAM_PASS].as<const char *>());
+                        f.file.close();
+                        GUI::msgbox("保存成功", "已将当前网络配置保存到文件");
+                    } else {
+                        GUI::msgbox("错误", "无法打开文件");
+                        Serial.printf("无法打开文件%s\n", toSavePath);
+                    }
+                }
+                break;
             default:
                 break;
         }
