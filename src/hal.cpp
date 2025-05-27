@@ -795,7 +795,7 @@ int HAL::tryConnectWiFi() {
     ESP_LOGI("hal", "tryConnectWiFi\n");
     cheak_freq();
     if (WiFi.isConnected()) {
-        return 0;
+        WiFi.disconnect();
     }
     if (config[PARAM_SSID] == "") {
         GUI::info_msgbox("提示", "请先配置WiFi");
