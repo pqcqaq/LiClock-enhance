@@ -55,15 +55,15 @@ void AppClockOnly::setup() {
 
             xSemaphoreGive(peripherals.i2cMutex);
 
-            u8g2Fonts.printf("温度:%.1f℃  气压:%.1f hPa", temperature, pressure);
+            u8g2Fonts.printf("温度:%.1f℃ 气压:%.1f hPa", temperature, pressure);
         }
     }
 
     // ===== 网络状态图标 =====
-    const unsigned char* wifi_icon =
-        WiFi.isConnected() ? wifi_connected_bits : wifi_disconnected_bits;
-    display.drawXBitmap(296 - 50, 111, wifi_icon, 20, 16,
-                        0);  // 电池图标左边 25px
+    // const unsigned char* wifi_icon =
+    //     WiFi.isConnected() ? wifi_connected_bits : wifi_disconnected_bits;
+    // display.drawXBitmap(296 - 50, 111, wifi_icon, 20, 16,
+    //                     0);  // 电池图标左边 25px
 
     // ===== 电池图标 =====
     display.drawXBitmap(296 - 25, 111, getBatteryIcon(), 20, 16, 0);
