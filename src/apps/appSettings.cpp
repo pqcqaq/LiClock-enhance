@@ -480,6 +480,8 @@ void AppSettings::menu_network() {
                         // 尝试连接Wifi
                         int result = hal.tryConnectWiFi();
                         if (result == 0) {
+                            config[PARAM_CLOCKONLY] = "0";
+                            hal.saveConfig();
                             GUI::msgbox("连接成功", (String("已连接到") + ssid +
                                                      "\n请重启设备以使设置生效")
                                                         .c_str());
@@ -829,12 +831,12 @@ void AppSettings::cheak_config(char *a) {
         char pass[256];
         sprintf(pass, "%s", GUI::englishInput("输入密码"));
         config[PARAM_PASS] = pass;
-        config[PARAM_CLOCKONLY] = "1";
         // 先确认是否能连上
         if (hal.tryConnectWiFi() == -1) {
             GUI::msgbox("连接失败", "请检查密码是否正确");
             return;
         } else {
+            config[PARAM_CLOCKONLY] = "0";
             hal.saveConfig();
             GUI::msgbox("提示", "已写入配置，即将重启！");
             esp_restart();
